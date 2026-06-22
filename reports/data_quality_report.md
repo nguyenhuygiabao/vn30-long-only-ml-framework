@@ -9,7 +9,7 @@ A flag identifies a row requiring review. A single source row may receive multip
 ## Dataset Summary
 
 - Source file: `sample_data/sample_ohlcv.csv`
-- Report generated: 2026-06-22 14:54:21
+- Report generated: 2026-06-22 15:00:40
 - Number of rows: 30
 - Number of tickers: 3
 - Earliest date: 2024-01-02

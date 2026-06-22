@@ -382,7 +382,7 @@ def main() -> None:
 
     print("Data-quality checks completed.")
     print(f"Rows checked: {len(data)}")
-    print(f"Tickers checked: {data['ticker'].unique()}")
+    print(f"Tickers checked: {data['ticker'].nunique()}")
     print(f"Issues flags found: {len(issues)}")
     print(f"Reports created: {REPORT_PATH}")
 
