@@ -277,31 +277,39 @@ def write_data_quality_report(
             columns = ["ticker","flag_count"]
         )
 
-        data_counts = pd.DataFrame(
+        date_counts = pd.DataFrame(
             columns = ["date", "flag_count"]
         )
     else: 
         status = "REVIEW REQUIRED"
 
-    issue_counts = (
-        issues 
-        .groupby("issue")
-        .size()
-        .reset_index(name = "flag_count")
-        .sort_values(
-            "flag_count",
-            ascending= False,
+        issue_counts = (
+            issues 
+            .groupby("issue")
+            .size()
+            .reset_index(name = "flag_count")
+            .sort_values(
+                "flag_count",
+                ascending= False,
+            )
         )
-    )
 
-    ticker_counts = (
-        issues 
-        .groupby("date") #Group the issue records by issue name and count how many rows each group contains
-        .size()
-        .reset_index(name = "flag_count")
-        .sort_values("date")
-    )
+        ticker_counts = (
+            issues 
+            .groupby("date") #Group the issue records by issue name and count how many rows each group contains
+            .size()
+            .reset_index(name = "flag_count")
+            .sort_values("date")
+        )
 
+        date_counts = ( 
+            issues
+            .groupby("date")
+            .size()
+            .reset_index(name = "flag_count")
+            .sort_values("date")
+
+    )
     report_lines = [
         "# VN30 Data Quality Report", 
         "", 
@@ -332,7 +340,7 @@ def write_data_quality_report(
         "", 
         "## Flag Counts by Date",
         "", 
-        dataframe_to_markdown(data_counts),
+        dataframe_to_markdown(date_counts),
         "", 
         "## Detailed Problem Rows", 
         "", dataframe_to_markdown(issues), 
