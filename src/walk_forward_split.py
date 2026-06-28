@@ -35,7 +35,7 @@ def build_modeling_dataset(
     )
     return modeling_dataset
 
-def seperate_target_rows(
+def separate_target_rows(
         modeling_dataset: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     historical_rows = (
@@ -167,7 +167,7 @@ def main() -> None:
         modeling_dataset[TARGET_COLUMN].isna().sum(),
     )
 
-    historical_rows, prediction_rows = seperate_target_rows(
+    historical_rows, prediction_rows = separate_target_rows(
         modeling_dataset
     )
 
