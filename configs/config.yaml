@@ -24,7 +24,8 @@ transaction_cost:
   slippage_bps: 20
 
 price_limit:
-  hose_daily_limit: 0.07
+  hose_normal_daily_limit: 0.07
+  hose_wide_daily_limit: 0.20
   block_buy_at_ceiling: true
   block_sell_at_floor: true
 

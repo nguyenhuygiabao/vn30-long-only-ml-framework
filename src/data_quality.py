@@ -365,7 +365,7 @@ def write_data_quality_report(
         "- Corporate actions are not independently verified.", 
         "- Historical VN30 membership is not yet included.", 
         "- Survivorship bias remains unresolved.", 
-        "- Official ceiling and floor prices are not yet included.", 
+        "- Official exchange-provided ceiling and floor prices are not included; estimated price-limit features are generated separately and should be checked against official data when available.",
         "",
     ]
 
