@@ -12,11 +12,16 @@ MOMENTUM_SCORE_COLUMN: str = "score_portfolio_momentum"
 REVERSAL_SCORE_COLUMN: str = "score_portfolio_reversal"
 LOW_VOLATILITY_SCORE_COLUMN: str = "score_portfolio_low_volatility"
 
+STOCK_RETURN_COLUMN: str = "forward_return_5d"
+BENCHMARK_RETURN_COLUMN: str = "vn30_forward_return_5d"
+
 POSITION_COLUMNS: list[str] = [
     "date",
     "ticker",
     "strategy",
     "weight",
+    STOCK_RETURN_COLUMN,
+    BENCHMARK_RETURN_COLUMN,
     TARGET_COLUMN,
 ]
 
@@ -121,15 +126,27 @@ def calculate_portfolio_returns(
             columns=[
                 "date",
                 "strategy",
-                "portfolio_return",
+                "portfolio_forward_return_5d",
+                "vn30_forward_return_5d",
+                "active_return_vs_vn30_5d",
                 "selected_count",
             ]
         )
 
     returns = (
         selected_positions.assign(
-            weighted_return=selected_positions["weight"]
-            * selected_positions[TARGET_COLUMN]
+            weighted_stock_return=(
+                selected_positions["weight"]
+                * selected_positions[STOCK_RETURN_COLUMN]
+            ),
+            weighted_benchmark_return=(
+                selected_positions["weight"]
+                * selected_positions[BENCHMARK_RETURN_COLUMN]
+            ),
+            weighted_active_return=(
+                selected_positions["weight"]
+                * selected_positions[TARGET_COLUMN]
+            ),
         )
         .groupby(
             [
@@ -139,7 +156,9 @@ def calculate_portfolio_returns(
             as_index=False,
         )
         .agg(
-            portfolio_return=("weighted_return", "sum"),
+            portfolio_forward_return_5d=("weighted_stock_return", "sum"),
+            vn30_forward_return_5d=("weighted_benchmark_return", "sum"),
+            active_return_vs_vn30_5d=("weighted_active_return", "sum"),
             selected_count=("ticker", "count"),
         )
     )
@@ -213,7 +232,7 @@ def build_baseline_returns(
     return baseline_returns
 
 
-def compare_against_equal_weight(
+def compare_against_vn30_index(
     baseline_returns: pd.DataFrame,
 ) -> pd.DataFrame:
     if baseline_returns.empty:
@@ -221,38 +240,23 @@ def compare_against_equal_weight(
             columns=[
                 "date",
                 "strategy",
-                "portfolio_return",
-                "equal_weight_return",
-                "excess_return_vs_equal_weight",
+                "portfolio_forward_return_5d",
+                "vn30_forward_return_5d",
+                "active_return_vs_vn30_5d",
+                "selected_count",
             ]
         )
 
-    equal_weight_returns = baseline_returns[
-        baseline_returns["strategy"] == "equal_weight_all"
-    ][
-        [
-            "date",
-            "portfolio_return",
-        ]
-    ].rename(
-        columns={
-            "portfolio_return": "equal_weight_return",
-        }
-    )
+    comparison_columns = [
+        "date",
+        "strategy",
+        "portfolio_forward_return_5d",
+        "vn30_forward_return_5d",
+        "active_return_vs_vn30_5d",
+        "selected_count",
+    ]
 
-    comparison = baseline_returns.merge(
-        equal_weight_returns,
-        on="date",
-        how="left",
-        validate="many_to_one",
-    )
-
-    comparison["excess_return_vs_equal_weight"] = (
-        comparison["portfolio_return"]
-        - comparison["equal_weight_return"]
-    )
-
-    return comparison
+    return baseline_returns[comparison_columns].copy()
 
 
 def main() -> None:
@@ -260,7 +264,7 @@ def main() -> None:
 
     baseline_returns = build_baseline_returns(historical_rows)
 
-    baseline_comparison = compare_against_equal_weight(
+    baseline_comparison = compare_against_vn30_index(
         baseline_returns=baseline_returns,
     )
 
@@ -282,12 +286,13 @@ def main() -> None:
     print(
         baseline_returns.groupby("strategy", as_index=False).agg(
             evaluated_dates=("date", "count"),
-            average_return=("portfolio_return", "mean"),
+            average_portfolio_forward_return_5d=("portfolio_forward_return_5d", "mean"),
+            average_active_return_vs_vn30_5d=("active_return_vs_vn30_5d", "mean"),
             average_selected_count=("selected_count", "mean"),
         )
     )
 
-    print("\nComparison against equal-weight baseline:")
+    print("\nComparison against VN30 index:")
     print(baseline_comparison)
 
 

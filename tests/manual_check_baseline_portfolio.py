@@ -1,9 +1,11 @@
 import pandas as pd
 
 from src.baseline_portfolios import (
+    BENCHMARK_RETURN_COLUMN,
+    STOCK_RETURN_COLUMN,
     build_baseline_positions,
     build_baseline_returns,
-    compare_against_equal_weight,
+    compare_against_vn30_index,
 )
 from src.walk_forward_split import TARGET_COLUMN
 
@@ -17,6 +19,10 @@ for date in [
     for ticker_number in range(1, 13):
         ticker = f"T{ticker_number:02d}"
 
+        vn30_forward_return = 0.02
+        relative_forward_return = ticker_number / 1000
+        stock_forward_return = vn30_forward_return + relative_forward_return
+
         synthetic_rows.append(
             {
                 "date": date,
@@ -24,7 +30,9 @@ for date in [
                 "return_10d": (13 - ticker_number) / 100,
                 "distance_from_20d_high": -(13 - ticker_number) / 100,
                 "rolling_vol_20d": ticker_number / 100,
-                TARGET_COLUMN: ticker_number / 1000,
+                STOCK_RETURN_COLUMN: stock_forward_return,
+                BENCHMARK_RETURN_COLUMN: vn30_forward_return,
+                TARGET_COLUMN: relative_forward_return,
             }
         )
 
@@ -34,7 +42,7 @@ baseline_positions = build_baseline_positions(synthetic_data)
 
 baseline_returns = build_baseline_returns(synthetic_data)
 
-baseline_comparison = compare_against_equal_weight(
+baseline_comparison = compare_against_vn30_index(
     baseline_returns=baseline_returns,
 )
 
@@ -62,7 +70,7 @@ print(
 print("\nBaseline returns:")
 print(baseline_returns)
 
-print("\nComparison against equal weight:")
+print("\nComparison against VN30 index:")
 print(baseline_comparison)
 
 expected_position_counts = {
