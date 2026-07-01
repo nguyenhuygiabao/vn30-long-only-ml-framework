@@ -13,14 +13,13 @@ def get_hose_tick_size(
     if pd.isna(price):
         return float("nan")
 
-    if price < 10_000:
-        return 10.0
+    if price < 10:
+        return 0.01
 
-    if price < 50_000:
-        return 50.0
+    if price < 50:
+        return 0.05
 
-    return 100.0
-
+    return 0.10
 
 def round_down_to_tick(
     price: float,
@@ -133,6 +132,14 @@ def add_estimated_price_limits(
 
     working["hit_floor_today"] = (
         working[floor_check_column] <= working["estimated_floor_price"]
+    )
+
+    working["close_at_ceiling_today"] = (
+        working[price_column] >= working["estimated_ceiling_price"]
+    )
+
+    working["close_at_floor_today"] = (
+        working[price_column] <= working["estimated_floor_price"]
     )
 
     working["consecutive_ceiling_days"] = working.groupby("ticker")[

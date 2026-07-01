@@ -40,12 +40,24 @@ def main() -> None:
         for column in REQUIRED_COLUMNS
     )
 
-    one_row_per_date = backtest_returns["date"].is_unique
+    one_row_per_date_per_mode = not backtest_returns.duplicated(
+    [
+        "date",
+        "execution_mode",
+    ]
+    ).any()
+
+    execution_modes = sorted(backtest_returns["execution_mode"].unique().tolist())
+
+    expected_execution_modes_present = execution_modes == [
+        "normal",
+        "price_limit_aware",
+    ]
 
     dates_match_weights = (
-        backtest_returns["date"].nunique()
-        == optimized_weights["date"].nunique()
-    )
+    backtest_returns.groupby("execution_mode")["date"].nunique()
+    == optimized_weights["date"].nunique()
+    ).all()
 
     total_weight_respected = (
         backtest_returns["total_weight"].max()
@@ -114,6 +126,31 @@ def main() -> None:
         ]
     )
 
+    mode_summary = backtest_returns.groupby("execution_mode").agg(
+        average_after_cost_return=("after_cost_return", "mean"),
+        final_after_cost_active_return=(
+            "cumulative_after_cost_active_return",
+            "last",
+        ),
+    )
+
+    normal_final_after_cost = mode_summary.loc[
+        "normal",
+        "final_after_cost_active_return",
+    ]
+
+    price_limit_final_after_cost = mode_summary.loc[
+        "price_limit_aware",
+        "final_after_cost_active_return",
+    ]
+
+    execution_modes_differ = (
+        abs(normal_final_after_cost - price_limit_final_after_cost)
+        > TOLERANCE
+    )
+
+    print("\nExecution mode summary:")
+    print(mode_summary)
     print("Backtest rows:", len(backtest_returns))
     print("Date count:", backtest_returns["date"].nunique())
     print("Average before-cost return:", backtest_returns["before_cost_return"].mean())
@@ -124,7 +161,9 @@ def main() -> None:
     print("Maximum low-liquidity weight:", backtest_returns["low_liquidity_weight"].max())
 
     print("\nRequired columns present:", required_columns_present)
-    print("One row per date:", one_row_per_date)
+    print("Execution modes:", execution_modes)
+    print("One row per date per mode:", one_row_per_date_per_mode)
+    print("Expected execution modes present:", expected_execution_modes_present)
     print("Dates match optimized weights:", dates_match_weights)
     print("Total weight respected:", total_weight_respected)
     print("Turnover respected:", turnover_respected)
@@ -134,6 +173,7 @@ def main() -> None:
     print("Average after-cost below before-cost:", average_after_cost_below_before_cost)
     print("Low-liquidity weight valid:", low_liquidity_weight_valid)
     print("Old compounded columns absent:", old_compounded_columns_absent)
+    print("Execution modes differ:", execution_modes_differ)
 
 
 if __name__ == "__main__":
