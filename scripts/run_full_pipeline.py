@@ -131,6 +131,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run only the report summary step.",
     )
+    parser.add_argument(
+        "--audit-after",
+        action="store_true",
+        help="Run the project state audit after selected pipeline steps finish.",
+    )
     return parser.parse_args()
 
 
@@ -203,6 +208,29 @@ def run_cleaner(dry_run: bool) -> None:
         )
 
 
+def run_audit() -> None:
+    audit_path = ROOT / "scripts" / "audit_project_state.py"
+
+    if not audit_path.exists():
+        raise FileNotFoundError(f"Missing audit script: {audit_path}")
+
+    print()
+    print("=" * 80)
+    print("Project state audit")
+    print("=" * 80)
+
+    completed = subprocess.run(
+        [sys.executable, str(audit_path)],
+        cwd=ROOT,
+        check=False,
+    )
+
+    if completed.returncode != 0:
+        raise RuntimeError(
+            f"Project state audit failed. Exit code: {completed.returncode}"
+        )
+
+
 def main() -> None:
     args = parse_args()
     steps = selected_steps(args.start_at, args.stop_after)
@@ -243,6 +271,9 @@ def main() -> None:
 
     for step_number, step in enumerate(steps, start=1):
         run_step(step_number, total_steps, step)
+
+    if args.audit_after:
+        run_audit()
 
     print()
     print("=" * 80)
