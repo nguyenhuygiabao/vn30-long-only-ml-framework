@@ -12,6 +12,7 @@ FIGURES_DIR = ROOT / "reports" / "figures"
 
 REPORT_PATHS = [
     ROOT / "README.md",
+    ROOT / "PROJECT_CONTEXT.md",
     ROOT / "reports" / "report_index.md",
     ROOT / "reports" / "final_results.md",
     ROOT / "reports" / "methodology.md",
@@ -132,6 +133,7 @@ def main() -> None:
     print("KEY PATHS")
     print("-" * 60)
     print("README: reports are linked from README.md")
+    print("Project context: PROJECT_CONTEXT.md")
     print("Report index: reports/report_index.md")
     print("Main results: reports/final_results.md")
     print("Methodology: reports/methodology.md")

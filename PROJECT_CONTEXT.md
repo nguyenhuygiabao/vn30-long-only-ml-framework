@@ -442,18 +442,41 @@ Final report tables and figures can be committed.
 ## Current usability upgrades already completed
 
 - Updated README.md as the GitHub front page
+- Added PROJECT_CONTEXT.md as the reusable project handoff prompt
 - Added reports/report_index.md
 - Added scripts/report_summary.py
+- Added scripts/run_full_pipeline.py for controlled one-command pipeline refresh
 - Added .gitignore rules for generated data
 - Removed BOM from requirements.txt
+- Made reports/data_quality_report.md deterministic by removing runtime timestamp noise
+
+## One-command pipeline runner
+
+File:
+
+scripts/run_full_pipeline.py
+
+Main commands:
+
+py .\scripts\run_full_pipeline.py --dry-run
+py .\scripts\run_full_pipeline.py --stop-after data_quality
+py .\scripts\run_full_pipeline.py --start-at features --stop-after labels
+py .\scripts\run_full_pipeline.py --start-at linear_models --stop-after classification_models
+py .\scripts\run_full_pipeline.py --start-at baseline_portfolios --stop-after backtester
+py .\scripts\run_full_pipeline.py --start-at ablation_tests --stop-after report_summary
+py .\scripts\run_full_pipeline.py
+
+Important implementation note:
+
+The runner executes src modules with py -m style through sys.executable, so relative imports work correctly.
 
 ## Priority next upgrades
 
-1. Add/update PROJECT_CONTEXT.md when project state changes.
-2. Add a reliable one-command pipeline runner.
-3. Add stale-output handling before reruns.
-4. Add clean audit/update workflow after each rerun.
-5. Add optional daily auto-update through Windows Task Scheduler or GitHub Actions later.
+1. Keep PROJECT_CONTEXT.md updated when project state changes.
+2. Add stale-output handling before reruns.
+3. Add clean audit/update workflow after each rerun.
+4. Add optional daily auto-update through Windows Task Scheduler or GitHub Actions later.
+5. Add Streamlit dashboard after the command-line workflow is stable.
 
 ## Future research upgrades
 

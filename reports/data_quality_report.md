@@ -9,7 +9,7 @@ A flag identifies a row requiring review. A single source row may receive multip
 ## Dataset Summary
 
 - Source file: `data/raw/vnstock/vn30_ohlcv.csv`
-- Report generated: 2026-07-03 11:02:16
+- Report generated: deterministic report; no runtime timestamp
 - Number of rows: 46863
 - Number of tickers: 30
 - Earliest date: 2020-01-02

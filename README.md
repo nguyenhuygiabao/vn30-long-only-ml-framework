@@ -190,13 +190,14 @@ Completed usability upgrades:
 - Added PROJECT_CONTEXT.md as the reusable project handoff prompt
 - Added reports/report_index.md to link reports, tables, and figures
 - Added scripts/report_summary.py for a quick command-line project summary
+- Added scripts/run_full_pipeline.py for controlled one-command pipeline refresh
 - Added .gitignore rules so generated raw and processed data stay local
 - Removed the UTF-8 BOM from requirements.txt
+- Made the data-quality report deterministic by removing runtime timestamp noise
 
 Priority next upgrades:
 
 - Keep PROJECT_CONTEXT.md updated after major project changes
-- Add a reliable one-command pipeline runner
 - Add stale-output handling for old generated predictions
 - Add a clean audit/update workflow after each rerun
 - Add optional daily auto-update later through Windows Task Scheduler or GitHub Actions

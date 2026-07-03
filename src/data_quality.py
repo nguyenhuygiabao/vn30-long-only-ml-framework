@@ -251,9 +251,7 @@ def write_data_quality_report(
         exist_ok=True,
     )
 
-    generated_at = pd.Timestamp.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
+    generated_at = "deterministic report; no runtime timestamp"
 
     if data.empty:
         earliest_date = "N/A"

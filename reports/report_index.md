@@ -4,6 +4,7 @@ This page links the main outputs of the VN30 Long-Only Machine Learning Framewor
 
 ## Start here
 
+- [Project Context](../PROJECT_CONTEXT.md): reusable handoff prompt for continuing the project in a new coding session.
 - [Final Results](final_results.md): main findings, backtest results, horizon tests, ablation tests, figures, limitations, and conclusion.
 - [Methodology](methodology.md): data, labels, features, models, validation, optimizer, backtester, transaction costs, and bias controls.
 - [Final Audit](final_audit.md): final repo state, script reruns, verification checks, and artifact audit.
