@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local environments
+.venv/
+venv/
+
+# Generated data outputs
+data/processed/
+data/raw/vnstock/
+data/raw/yahoo/
