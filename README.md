@@ -1,268 +1,212 @@
-# VN30 Long-Only Machine Learning Forecasting Framework
+# VN30 Long-Only Machine Learning Framework
 
-## Project Overview
+A research-grade framework for ranking VN30 stocks, forecasting forward relative returns versus the VN30 benchmark, and constructing constrained long-only portfolios under Vietnam-specific market frictions.
 
-This project develops a long-only machine learning research framework for selecting and allocating capital among VN30 stocks.
+This project is a transparent research framework. It is not a live trading system and it is not financial advice.
 
-The framework is designed around features of the Vietnamese equity market, including:
+## Project objective
 
-* the absence of generally accessible short selling
-* the HOSE daily price-limit mechanism
-* liquidity and transaction-cost constraints
-* possible herd-like market behavior
-* difficulty executing trades when stocks are locked at ceiling or floor prices
+The goal is to study whether daily public OHLCV-based features can support medium-frequency VN30 stock ranking and long-only portfolio construction.
 
-The project is intended as a quantitative research and portfolio-construction framework. It is not presented as a guaranteed profitable trading system.
+The framework focuses on:
 
-## Research Question
+- Forward relative-return prediction versus the VN30 benchmark
+- Walk-forward validation instead of random train-test splitting
+- Long-only constrained portfolio construction
+- Vietnam-specific transaction costs and price-limit frictions
+- Feature ablation and forecast horizon robustness testing
+- Final report artifacts for methodology, results, audit, tables, and figures
 
-Can price, volume, volatility, liquidity, price-limit behavior, and market-wide herding proxies help rank VN30 stocks by their future returns relative to the VN30 index?
+## Data
 
-## Investment Universe
-
-The intended investment universe is the historical membership of the VN30 index.
-
-The initial development dataset contains synthetic observations for three tickers:
-
-* FPT
-* HPG
-* VNM
-
-The synthetic dataset is used only to test the data pipeline. It is not used to draw investment conclusions.
-
-Historical VN30 membership will be required later to reduce survivorship bias.
-
-## Prediction Target
-
-The planned primary target is:
+Main raw data source:
 
 ```text
-forward_relative_return_5d
+data/raw/vnstock/vn30_ohlcv.csv
 ```
 
-This is defined as:
+Current dataset:
+
+- 46,863 daily OHLCV rows
+- 30 VN30 tickers
+- Date range: 2020-01-02 to 2026-06-30
+- Daily end-of-day data, not intraday data
+
+Important limitation:
+
+The current VN30 universe is static, not fully point-in-time. This may introduce survivorship bias and should be addressed in future work.
+
+## Current VN30 universe
 
 ```text
-stock's next five-trading-day return
-minus
-VN30 index's next five-trading-day return
+ACB, BID, BSR, CTG, FPT, GAS, GVR, HDB, HPG, LPB,
+MBB, MSN, MWG, PLX, SAB, SHB, SSB, SSI, STB, TCB,
+TPB, VCB, VHM, VIB, VIC, VJC, VNM, VPB, VPL, VRE
 ```
 
-The framework predicts relative returns rather than raw stock prices.
-
-## Market Constraints
-
-### Long-Only Constraint
-
-Portfolio weights cannot be negative.
-
-The framework will not assume ordinary short selling is available.
-
-### Position Constraints
-
-The planned portfolio rules include:
-
-* maximum weight per stock
-* maximum portfolio turnover
-* optional cash allocation
-* liquidity-based position limits
-
-### Price-Limit Constraint
-
-The initial configuration assumes a normal HOSE daily price limit of 7 percent.
-
-The future backtester will not automatically assume that:
-
-* a stock locked at its ceiling price can be purchased
-* a stock locked at its floor price can be sold
-
-Official reference prices and exchange rounding rules should be used when suitable data becomes available.
-
-### Herding Constraint
-
-Herding cannot be directly observed from daily OHLCV data.
-
-The project will therefore use market-wide herding proxies such as:
-
-* cross-sectional return dispersion
-* average pairwise return correlation
-* market breadth
-* percentage of VN30 stocks hitting ceiling or floor prices
-* abnormal market-wide volume
-* concentration of traded value
-
-These variables will be described as proxies, not direct proof of investor herding.
-
-## Planned Data Inputs
-
-The intended input data includes:
-
-* date
-* ticker
-* open price
-* high price
-* low price
-* close price
-* adjusted close price
-* trading volume
-* traded value
-* VN30 index data
-* historical VN30 membership
-* corporate-action information where available
-
-## Planned Feature Groups
-
-The framework is expected to include:
-
-* momentum
-* short-term reversal
-* realized volatility
-* volume shocks
-* liquidity
-* relative strength
-* market beta
-* price-limit behavior
-* herding proxies
-
-## Planned Models
-
-The first models will be deliberately simple:
-
-* Ridge regression
-* Elastic Net
-* logistic regression
-* Random Forest
-* Gradient Boosting
-
-More complicated models will only be considered after the simple models and baselines have been evaluated correctly.
-
-## Validation Method
-
-The framework will use time-ordered walk-forward validation.
-
-Random train-test splitting will not be used because it can create look-ahead bias in financial time-series research.
-
-Model evaluation will include:
-
-* Spearman rank information coefficient
-* top-stock hit rate
-* top-minus-bottom return spread
-* portfolio Sharpe ratio
-* maximum drawdown
-* turnover
-* transaction-cost impact
-
-## Baseline Strategies
-
-Machine learning results will be compared with:
-
-* equal-weight VN30
-* momentum ranking
-* reversal ranking
-* low-volatility selection
-* liquidity-adjusted momentum
-
-A machine learning model will not be considered useful merely because it has good in-sample fit.
-
-## Expected Model Output
-
-After receiving properly formatted VN30 market data, the completed framework is expected to produce:
-
-1. a ranking of eligible VN30 stocks by predicted forward relative return
-2. predicted return or probability scores
-3. long-only portfolio weights
-4. buy, hold, or avoid research signals
-5. ceiling and floor execution warnings
-6. a market herding-risk indicator
-7. estimated portfolio risk and expected return
-8. a backtest report
-9. comparisons with simple baseline strategies
-
-## Current Project Status
-
-Completed:
-
-* repository structure
-* Python package installation
-* project configuration
-* synthetic OHLCV sample dataset
-* initial CSV data loader
-* required-column validation
-* date and ticker standardization
-
-In progress:
-
-* financial data-quality checks
-* automated data-quality reporting
-
-Not yet implemented:
-
-* feature engineering
-* prediction labels
-* baseline strategies
-* machine learning models
-* walk-forward validation
-* portfolio optimization
-* transaction-cost modeling
-* price-limit-aware execution
-* herding-regime controls
-
-## Known Limitations
-
-The project currently has the following limitations:
-
-* sample data is synthetic
-* historical VN30 membership has not yet been added
-* corporate actions are not yet verified
-* official ceiling and floor prices are not yet included
-* order-book data is unavailable
-* herding variables will only be proxies
-* transaction costs and market impact are not yet calibrated
-
-## Repository Structure
+Issuer-group metadata is stored in:
 
 ```text
-configs/       Project configuration
-data/          Raw, processed, and external data
-notebooks/     Research and visualization notebooks
-reports/       Generated research reports
-sample_data/   Small reproducible sample dataset
-src/           Reusable Python source code
-tests/         Automated tests
+config/vn30_universe.csv
 ```
 
-## Current Sample Input Schema
+## Framework components
 
-The current loader expects the following columns:
+The project includes:
+
+- Feature engineering
+- Forward relative-return labels
+- Walk-forward validation
+- Linear, tree-based, and classification models
+- Baseline portfolios
+- Rolling past-only risk model
+- Constrained long-only optimizer
+- Transaction-cost-aware backtester
+- Price-limit-aware execution comparison
+- Herding-aware portfolio risk control
+- Feature ablation testing
+- Forecast horizon testing
+- Result visualization
+- Final methodology, results, and audit reports
+
+## Main research finding
+
+The strongest tested forecast horizon is currently the 10-day forward relative-return label.
+
+Forecast horizon results:
+
+| Horizon | Average Rank IC | Top-5 Hit Rate | Diagnostic Sharpe | Max Active Drawdown | Final After-Cost Active Return |
+|---|---:|---:|---:|---:|---:|
+| 1d | -0.003844 | 0.447861 | -0.140805 | -1.525574 | -1.508238 |
+| 5d | 0.338033 | 0.676072 | 0.840073 | -0.355852 | 29.360326 |
+| 10d | 0.546504 | 0.801122 | 1.398924 | -0.219472 | 77.915433 |
+
+Interpretation:
+
+- 1-day prediction is weak and noisy.
+- 5-day prediction is a strong baseline.
+- 10-day prediction is the strongest tested research horizon so far.
+
+## Feature ablation summary
+
+The full feature set performs best overall.
+
+| Feature Set | Feature Count | Average Rank IC | Diagnostic Sharpe | Final After-Cost Active Return |
+|---|---:|---:|---:|---:|
+| all_features | 51 | 0.338033 | 0.840073 | 29.360326 |
+| without_herding | 41 | 0.337983 | 0.827557 | 29.281588 |
+| without_price_limit | 36 | 0.316762 | 0.784717 | 27.268516 |
+| without_risk | 49 | 0.314453 | 0.749285 | 26.301430 |
+| without_volume_liquidity | 40 | 0.307164 | 0.742006 | 26.341446 |
+
+Interpretation:
+
+- Volume/liquidity, price-limit, and risk features matter more for raw predictive performance.
+- Herding features add limited standalone alpha.
+- Herding remains useful as a portfolio-level risk-control mechanism.
+
+## Important reports
+
+Open these first:
 
 ```text
-date
-ticker
-open
-high
-low
-close
-adjusted_close
-volume
-value_traded
+reports/final_results.md
+reports/methodology.md
+reports/final_audit.md
 ```
 
-## Run the Current Data Loader
+Additional reports:
 
-From the project root:
+```text
+reports/model_report.md
+reports/data_quality_report.md
+```
+
+## Tables
+
+```text
+reports/tables/ablation_results.csv
+reports/tables/horizon_results.csv
+```
+
+## Figures
+
+```text
+reports/figures/cumulative_after_cost_active_return.png
+reports/figures/active_drawdown.png
+reports/figures/portfolio_turnover.png
+reports/figures/rolling_diagnostic_sharpe.png
+reports/figures/top_gradient_boosting_feature_importance.png
+reports/figures/ablation_diagnostic_sharpe.png
+reports/figures/horizon_diagnostic_sharpe.png
+reports/figures/horizon_rank_ic.png
+```
+
+## How to view outputs locally
+
+Open reports in VS Code:
 
 ```powershell
-python .\src\data_loader.py
+code .\reports\final_results.md
+code .\reports\methodology.md
+code .\reports\final_audit.md
 ```
 
-Expected summary:
+Preview Markdown in VS Code:
 
 ```text
-Rows loaded: 30
-Tickers: 3
-Date range: 2024-01-02 to 2024-01-15
+Ctrl + Shift + V
 ```
+
+Open figures:
+
+```powershell
+explorer .\reports\figures
+```
+
+Open tables:
+
+```powershell
+explorer .\reports\tables
+```
+
+## Repository hygiene
+
+Generated data files are intentionally ignored by Git:
+
+```text
+data/processed/
+data/raw/vnstock/
+data/raw/yahoo/
+```
+
+These files are local reproducible outputs and should not be committed unless they are final report tables or figures.
+
+## Planned upgrades
+
+Near-term:
+
+- Add `reports/report_index.md`
+- Add a one-command pipeline runner
+- Add stale-output handling for old generated predictions
+- Add command-line report summary
+
+Medium-term:
+
+- Add Streamlit dashboard
+- Add Windows Task Scheduler refresh
+- Add stronger out-of-sample robustness tests
+- Add non-overlapping portfolio evaluation
+- Improve execution realism
+
+Long-term:
+
+- Add point-in-time VN30 membership
+- Add fundamental data
+- Add foreign ownership or flow data
+- Add macro variables
+- Add reproducible sentiment or news features if reliable sources are available
 
 ## Disclaimer
 
-This project is for educational and quantitative research purposes. It does not provide investment advice or guarantee future trading performance.
+This repository is for research and educational purposes only. It does not provide investment advice and does not claim to be a deployable trading strategy.
