@@ -4,6 +4,7 @@ This page links the main outputs of the VN30 Long-Only Machine Learning Framewor
 
 ## Start here
 
+- [HTML Dashboard](dashboard.html): visual dashboard with stock ranking, portfolio weights, figures, and metric glossary.
 - [Project Context](../PROJECT_CONTEXT.md): reusable handoff prompt for continuing the project in a new coding session.
 - [Final Results](final_results.md): main findings, backtest results, horizon tests, ablation tests, figures, limitations, and conclusion.
 - [Methodology](methodology.md): data, labels, features, models, validation, optimizer, backtester, transaction costs, and bias controls.

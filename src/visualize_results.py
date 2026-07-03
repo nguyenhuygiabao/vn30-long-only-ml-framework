@@ -2,8 +2,30 @@ from __future__ import annotations
 
 from pathlib import Path
 import matplotlib.pyplot as plt
+from matplotlib.ticker import PercentFormatter
 
 import pandas as pd
+
+SCENARIO_ORDER = [
+    ("herding_aware", "normal"),
+    ("herding_aware", "price_limit_aware"),
+    ("normal", "normal"),
+    ("normal", "price_limit_aware"),
+]
+
+SCENARIO_LABELS = {
+    ("herding_aware", "normal"): "Herding-aware / Normal",
+    ("herding_aware", "price_limit_aware"): "Herding-aware / Price-limit aware",
+    ("normal", "normal"): "Normal / Normal",
+    ("normal", "price_limit_aware"): "Normal / Price-limit aware",
+}
+
+SCENARIO_COLORS = {
+    ("herding_aware", "normal"): "#1f77b4",
+    ("herding_aware", "price_limit_aware"): "#ff7f0e",
+    ("normal", "normal"): "#2ca02c",
+    ("normal", "price_limit_aware"): "#d62728",
+}
 
 
 BACKTEST_RETURNS_PATH: str = "data/processed/backtest_returns.parquet"
@@ -37,6 +59,34 @@ def print_dataset_overview(
     for column in data.columns:
         print("-", column)
 
+def display_scenario_label(
+    optimization_mode: str,
+    execution_mode: str,
+) -> str:
+    return SCENARIO_LABELS.get(
+        (optimization_mode, execution_mode),
+        f"{optimization_mode} / {execution_mode}",
+    )
+
+
+def place_legend_outside() -> None:
+    plt.legend(
+        loc="center left",
+        bbox_to_anchor=(1.02, 0.5),
+        borderaxespad=0.0,
+        frameon=True,
+    )
+
+
+def scenario_color(
+    optimization_mode: str,
+    execution_mode: str,
+) -> str:
+    return SCENARIO_COLORS.get(
+        (optimization_mode, execution_mode),
+        "#333333",
+    )
+
 def plot_cumulative_after_cost_returns() -> Path:
     data = pd.read_parquet(BACKTEST_RETURNS_PATH)
     data["date"] = pd.to_datetime(data["date"])
@@ -60,7 +110,7 @@ def plot_cumulative_after_cost_returns() -> Path:
 
     output_path = Path(FIGURES_DIR) / "cumulative_after_cost_active_return.png"
 
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(15, 6))
 
     for (
         optimization_mode,
@@ -73,20 +123,24 @@ def plot_cumulative_after_cost_returns() -> Path:
     ):
         group = group.sort_values("date")
 
-        label = f"{optimization_mode} | {execution_mode}"
+        label = display_scenario_label(optimization_mode, execution_mode)
+        color = scenario_color(optimization_mode, execution_mode)
 
         plt.plot(
             group["date"],
             group["cumulative_after_cost_active_return"],
             label=label,
+            color=color,
+            linewidth=0.9,
+            alpha=0.85,
         )
 
     plt.title("Cumulative After-Cost Active Return")
     plt.xlabel("Date")
     plt.ylabel("Cumulative after-cost active return")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150)
+    place_legend_outside()
+    plt.tight_layout(rect=[0, 0, 0.78, 1])
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close()
 
     return output_path
@@ -114,43 +168,123 @@ def plot_active_drawdowns() -> Path:
 
     output_path = Path(FIGURES_DIR) / "active_drawdown.png"
 
-    plt.figure(figsize=(12, 6))
+    scenario_order = [
+        ("herding_aware", "normal"),
+        ("herding_aware", "price_limit_aware"),
+        ("normal", "normal"),
+        ("normal", "price_limit_aware"),
+    ]
 
-    for (
-        optimization_mode,
-        execution_mode,
-    ), group in data.groupby(
-        [
-            "optimization_mode",
-            "execution_mode",
-        ]
-    ):
+    scenario_labels = {
+        ("herding_aware", "normal"): "Herding-aware / Normal execution",
+        ("herding_aware", "price_limit_aware"): "Herding-aware / Price-limit aware",
+        ("normal", "normal"): "Normal / Normal execution",
+        ("normal", "price_limit_aware"): "Normal / Price-limit aware",
+    }
+
+    scenario_colors = {
+        ("herding_aware", "normal"): "#0072B2",
+        ("herding_aware", "price_limit_aware"): "#E69F00",
+        ("normal", "normal"): "#009E73",
+        ("normal", "price_limit_aware"): "#CC79A7",
+    }
+
+    scenario_series = []
+    global_min = 0.0
+
+    for optimization_mode, execution_mode in scenario_order:
+        group = data[
+            data["optimization_mode"].eq(optimization_mode)
+            & data["execution_mode"].eq(execution_mode)
+        ].copy()
+
+        if group.empty:
+            continue
+
         group = group.sort_values("date").copy()
+        cumulative_return = group["cumulative_after_cost_active_return"]
+        running_peak = cumulative_return.cummax()
+        group["active_drawdown"] = cumulative_return - running_peak
 
-        running_peak = group[
-            "cumulative_after_cost_active_return"
-        ].cummax()
-
-        group["active_drawdown"] = (
-            group["cumulative_after_cost_active_return"]
-            - running_peak
+        weekly_worst_drawdown = (
+            group.set_index("date")["active_drawdown"]
+            .resample("W-FRI")
+            .min()
+            .dropna()
         )
 
-        label = f"{optimization_mode} | {execution_mode}"
+        if weekly_worst_drawdown.empty:
+            continue
 
-        plt.plot(
-            group["date"],
-            group["active_drawdown"],
-            label=label,
+        global_min = min(global_min, weekly_worst_drawdown.min())
+
+        scenario_series.append(
+            {
+                "key": (optimization_mode, execution_mode),
+                "label": scenario_labels[(optimization_mode, execution_mode)],
+                "color": scenario_colors[(optimization_mode, execution_mode)],
+                "series": weekly_worst_drawdown,
+                "worst_value": weekly_worst_drawdown.min(),
+                "worst_date": weekly_worst_drawdown.idxmin(),
+            }
         )
 
-    plt.title("Active Drawdown from Previous Peak")
-    plt.xlabel("Date")
-    plt.ylabel("Active drawdown")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150)
-    plt.close()
+    if not scenario_series:
+        raise ValueError("No drawdown series available for plotting.")
+
+    fig, axes = plt.subplots(2, 2, figsize=(16, 10), sharex=True, sharey=True)
+    axes = axes.flatten()
+
+    y_min = global_min * 1.10 if global_min < 0 else -0.05
+    y_max = 0.02
+
+    for ax, item in zip(axes, scenario_series):
+        series = item["series"]
+
+        ax.plot(
+            series.index,
+            series.values,
+            color=item["color"],
+            linewidth=1.0,
+        )
+        ax.fill_between(
+            series.index,
+            series.values,
+            0,
+            color=item["color"],
+            alpha=0.12,
+        )
+        ax.axhline(0, color="black", linewidth=0.8)
+        ax.set_title(item["label"], fontsize=11)
+        ax.set_ylim(y_min, y_max)
+        ax.grid(True, alpha=0.25)
+
+        ax.scatter(
+            [item["worst_date"]],
+            [item["worst_value"]],
+            color=item["color"],
+            s=24,
+            zorder=3,
+        )
+
+        ax.annotate(
+            f"{item['worst_value']:.3f}",
+            xy=(item["worst_date"], item["worst_value"]),
+            xytext=(8, 8),
+            textcoords="offset points",
+            fontsize=9,
+        )
+
+    for ax in axes[2:]:
+        ax.set_xlabel("Date")
+
+    axes[0].set_ylabel("Weekly worst active drawdown")
+    axes[2].set_ylabel("Weekly worst active drawdown")
+
+    fig.suptitle("Weekly Worst Active Drawdown by Scenario", fontsize=16)
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
 
     return output_path
 
@@ -177,7 +311,7 @@ def plot_portfolio_turnover() -> Path:
 
     output_path = Path(FIGURES_DIR) / "portfolio_turnover.png"
 
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(16, 6))
 
     for (
         optimization_mode,
@@ -188,25 +322,37 @@ def plot_portfolio_turnover() -> Path:
             "execution_mode",
         ]
     ):
-        group = group.sort_values("date")
+        group = group.sort_values("date").copy()
 
-        label = f"{optimization_mode} | {execution_mode}"
-
-        plt.plot(
-            group["date"],
-            group["portfolio_turnover"],
-            label=label,
+        weekly_average_turnover = (
+            group.set_index("date")["portfolio_turnover"]
+            .resample("W-FRI")
+            .mean()
+            .dropna()
         )
 
-    plt.title("Portfolio Turnover")
+        label = display_scenario_label(optimization_mode, execution_mode)
+        color = scenario_color(optimization_mode, execution_mode)
+
+        plt.plot(
+            weekly_average_turnover.index,
+            weekly_average_turnover,
+            label=label,
+            linewidth=0.7,
+            alpha=0.75,
+        )
+
+    plt.title("Weekly Average Portfolio Turnover")
     plt.xlabel("Date")
-    plt.ylabel("Turnover")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150)
+    plt.ylabel("Average weekly turnover")
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
+    place_legend_outside()
+    plt.tight_layout(rect=[0, 0, 0.78, 1])
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close()
 
     return output_path
+
 
 def plot_top_tree_feature_importance(top_n: int = 20) -> Path:
     data = pd.read_parquet(TREE_FEATURE_IMPORTANCE_PATH)
@@ -365,7 +511,7 @@ def plot_rolling_diagnostic_sharpe(
 
     output_path = Path(FIGURES_DIR) / "rolling_diagnostic_sharpe.png"
 
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(15, 6))
 
     for (
         optimization_mode,
@@ -390,20 +536,24 @@ def plot_rolling_diagnostic_sharpe(
             rolling_mean / rolling_volatility
         )
 
-        label = f"{optimization_mode} | {execution_mode}"
+        label = display_scenario_label(optimization_mode, execution_mode)
+        color = scenario_color(optimization_mode, execution_mode)
 
         plt.plot(
             group["date"],
             group["rolling_diagnostic_sharpe"],
             label=label,
+            color=color,
+            linewidth=0.9,
+            alpha=0.85,
         )
 
     plt.title(f"Rolling {rolling_window}-Window Diagnostic Sharpe")
     plt.xlabel("Date")
     plt.ylabel("Rolling diagnostic Sharpe")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150)
+    place_legend_outside()
+    plt.tight_layout(rect=[0, 0, 0.78, 1])
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close()
 
     return output_path

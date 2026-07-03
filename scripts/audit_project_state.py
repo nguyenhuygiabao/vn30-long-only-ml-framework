@@ -15,12 +15,14 @@ KEY_FILES = [
     ROOT / "reports" / "final_audit.md",
     ROOT / "reports" / "model_report.md",
     ROOT / "reports" / "data_quality_report.md",
+    ROOT / "reports" / "dashboard.html",
     ROOT / "reports" / "tables" / "ablation_results.csv",
     ROOT / "reports" / "tables" / "horizon_results.csv",
     ROOT / "scripts" / "run_full_pipeline.py",
     ROOT / "scripts" / "clean_generated_outputs.py",
     ROOT / "scripts" / "report_summary.py",
     ROOT / "scripts" / "audit_project_state.py",
+    ROOT / "scripts" / "build_html_report.py",
 ]
 
 GENERATED_PATH_PREFIXES = [
