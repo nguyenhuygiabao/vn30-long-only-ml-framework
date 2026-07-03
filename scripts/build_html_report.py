@@ -7,128 +7,90 @@ import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = ROOT / "data" / "processed"
 REPORTS_DIR = ROOT / "reports"
 TABLES_DIR = REPORTS_DIR / "tables"
 FIGURES_DIR = REPORTS_DIR / "figures"
-DATA_DIR = ROOT / "data" / "processed"
+
 OUTPUT_PATH = REPORTS_DIR / "dashboard.html"
 
+HORIZON_RESULTS_PATH = TABLES_DIR / "horizon_results.csv"
+ABLATION_RESULTS_PATH = TABLES_DIR / "ablation_results.csv"
+TREE_PREDICTIONS_PATH = DATA_DIR / "tree_model_predictions.parquet"
+OPTIMIZED_WEIGHTS_PATH = DATA_DIR / "optimized_weights.parquet"
 
-FIGURE_ORDER = [
-    "cumulative_after_cost_active_return.png",
-    "active_drawdown.png",
-    "portfolio_turnover.png",
-    "rolling_diagnostic_sharpe.png",
-    "horizon_diagnostic_sharpe.png",
-    "horizon_rank_ic.png",
-    "ablation_diagnostic_sharpe.png",
-    "top_gradient_boosting_feature_importance.png",
+
+INTERACTIVE_SECTIONS = [
+    {
+        "title": "Cumulative after-cost active return",
+        "file": "interactive/interactive_cumulative_return.html",
+        "meaning": "Shows whether the strategy builds active value over time after estimated trading costs.",
+        "read": "A rising line means the strategy is adding active return. Click legend items to hide, show, or isolate scenarios.",
+        "watch": "Look for steady growth, long flat periods, and sharp drops.",
+    },
+    {
+        "title": "Active drawdown",
+        "file": "interactive/interactive_active_drawdown.html",
+        "meaning": "Shows how far the strategy falls below its previous active-return peak.",
+        "read": "Values closer to zero are better. Deep negative drops mean the strategy gave back previous gains.",
+        "watch": "Use the slider to inspect the large 2026 drawdown and compare execution assumptions.",
+    },
+    {
+        "title": "Portfolio turnover",
+        "file": "interactive/interactive_portfolio_turnover.html",
+        "meaning": "Shows how much the portfolio changes between rebalancing dates.",
+        "read": "Higher turnover means more trading. More trading can make live execution less realistic because costs rise.",
+        "watch": "Look for long periods near the maximum turnover level.",
+    },
+    {
+        "title": "Rolling 60-day diagnostic Sharpe",
+        "file": "interactive/interactive_rolling_diagnostic_sharpe.html",
+        "meaning": "Shows short-term risk-adjusted performance over rolling 60-trading-day windows.",
+        "read": "Higher values mean better return per unit of volatility during the recent window.",
+        "watch": "Look for unstable periods where the rolling Sharpe drops sharply.",
+    },
 ]
 
 
-FIGURE_NOTES = {
-    "cumulative_after_cost_active_return.png": {
-        "meaning": "This is the main performance path. It shows whether the strategy grows after estimated trading costs.",
-        "read": "Focus on the overall direction and the gap between lines. If the lines rise steadily, the backtest is strong. If one line is consistently above another, that version performs better.",
-        "limit": "If the lines are very close, the graph is saying the different execution or optimization modes produce similar outcomes. We should later adjust this figure to make the comparison easier.",
+STATIC_SECTIONS = [
+    {
+        "title": "Top gradient boosting feature importance",
+        "file": "figures/top_gradient_boosting_feature_importance.png",
+        "meaning": "Shows which inputs the gradient boosting model relied on most.",
+        "read": "Larger bars mean higher model importance.",
     },
-    "active_drawdown.png": {
-        "meaning": "This shows how much performance falls from a previous high point.",
-        "read": "The closer the line stays to zero, the less painful the strategy is. Deep downward spikes show periods when the strategy gave back previous gains.",
-        "limit": "This graph is currently dense. The most useful part is the deepest drop and whether the strategy recovers quickly.",
+    {
+        "title": "Horizon diagnostic Sharpe",
+        "file": "figures/horizon_diagnostic_sharpe.png",
+        "meaning": "Compares risk-adjusted behavior across prediction horizons.",
+        "read": "Higher is better for this diagnostic metric.",
     },
-    "portfolio_turnover.png": {
-        "meaning": "This shows how much the portfolio changes between rebalancing dates.",
-        "read": "Higher turnover means more buying and selling. More trading usually means more costs and lower practical realism.",
-        "limit": "If the lines are too close, the graph is not doing enough visual work. We should later change it into a clearer summary or rescale it.",
+    {
+        "title": "Horizon Rank IC",
+        "file": "figures/horizon_rank_ic.png",
+        "meaning": "Compares how well the model ranks stocks across forecast horizons.",
+        "read": "Higher means the ranking aligns better with realized future relative returns.",
     },
-    "rolling_diagnostic_sharpe.png": {
-        "meaning": "This shows whether the strategy stays useful across time instead of only working in one lucky period.",
-        "read": "Higher values mean better return compared with volatility in that rolling window. Long weak stretches are more concerning than short dips.",
-        "limit": "Rolling metrics can be noisy, so the broad trend matters more than each small movement.",
+    {
+        "title": "Ablation diagnostic Sharpe",
+        "file": "figures/ablation_diagnostic_sharpe.png",
+        "meaning": "Shows what happens when feature groups are removed.",
+        "read": "If performance falls after removing a group, that group likely adds useful information.",
     },
-    "horizon_diagnostic_sharpe.png": {
-        "meaning": "This compares which prediction horizon gives the best risk-adjusted backtest result.",
-        "read": "The strongest horizon is the one with the highest value. In this project, the longer horizon is currently stronger than the 1-day horizon.",
-        "limit": "This does not mean the best horizon will always stay best in future data.",
-    },
-    "horizon_rank_ic.png": {
-        "meaning": "This checks whether the model ranks stocks in the right order for each forecast horizon.",
-        "read": "Higher Rank IC means the model is better at putting future winners above future losers.",
-        "limit": "A high ranking score supports the signal, but it still needs portfolio and cost testing.",
-    },
-    "ablation_diagnostic_sharpe.png": {
-        "meaning": "This checks whether removing feature groups weakens performance.",
-        "read": "If the full feature set performs best, the removed feature groups likely contain useful information.",
-        "limit": "Small differences should not be over-interpreted. The key question is whether the ranking changes meaningfully.",
-    },
-    "top_gradient_boosting_feature_importance.png": {
-        "meaning": "This shows which input variables the Gradient Boosting model uses most.",
-        "read": "Features near the top have more influence on the model's predictions.",
-        "limit": "Feature importance explains model usage, not guaranteed economic causality.",
-    },
-}
+]
 
 
-DISPLAY_NAMES = {
-    "rank": "Rank",
-    "ticker": "Ticker",
-    "signal_date": "Signal date",
-    "model": "Model",
-    "model_score": "Model score",
-    "weight": "Portfolio weight",
-    "issuer_group": "Issuer group",
-    "optimization_mode": "Optimization mode",
-    "realized_forward_return": "Realized forward return",
-    "forecast_horizon_days": "Forecast horizon days",
-    "horizon_label": "Target label",
-    "ablation_name": "Feature set tested",
-    "evaluated_dates": "Evaluated dates",
-    "feature_count": "Feature count",
-    "average_rank_ic": "Average Rank IC",
-    "average_top_5_hit_rate": "Average top-5 hit rate",
-    "average_top_5_actual_return": "Average top-5 realized return",
-    "average_selected_count": "Average selected stocks",
-    "average_after_cost_return": "Average after-cost return",
-    "return_volatility": "Return volatility",
-    "diagnostic_sharpe": "Diagnostic Sharpe",
-    "max_active_drawdown": "Max active drawdown",
-    "average_turnover": "Average turnover",
-    "maximum_turnover": "Maximum turnover",
-    "final_cumulative_after_cost_active_return": "Final cumulative after-cost active return",
-    "predicted_return": "Predicted return",
-    "actual_return": "Realized forward return",
-    "portfolio_turnover": "Portfolio turnover",
-    "high_herding_day": "High-herding day",
-}
-
-
-PERCENT_COLUMNS = {
-    "model_score",
-    "weight",
-    "realized_forward_return",
-    "predicted_return",
-    "actual_return",
-    "average_top_5_hit_rate",
-    "average_top_5_actual_return",
-    "average_after_cost_return",
-    "return_volatility",
-    "max_active_drawdown",
-    "average_turnover",
-    "maximum_turnover",
-    "portfolio_turnover",
-}
-
-
-REPORT_LINKS = [
-    ("README", "../README.md"),
-    ("Project Context", "../PROJECT_CONTEXT.md"),
-    ("Report Index", "report_index.md"),
-    ("Final Results", "final_results.md"),
-    ("Methodology", "methodology.md"),
-    ("Final Audit", "final_audit.md"),
-    ("Model Report", "model_report.md"),
-    ("Data Quality Report", "data_quality_report.md"),
+GLOSSARY_ROWS = [
+    ("Rank IC", "Correlation between the model's stock ranking and realized future return ranking."),
+    ("Diagnostic Sharpe", "Return divided by volatility, annualized. Used here as a diagnostic comparison metric."),
+    ("Active return", "Return relative to the reference portfolio or benchmark."),
+    ("After-cost return", "Return after estimated commission, slippage, and liquidity penalties."),
+    ("Drawdown", "Fall from a previous performance peak."),
+    ("Turnover", "How much the portfolio changes between rebalancing dates."),
+    ("Feature ablation", "Removing feature groups to test whether they help."),
+    ("Forecast horizon", "How far ahead the model predicts, such as 1 day, 5 days, or 10 days."),
+    ("Top-5 hit rate", "How often top-ranked stocks are among better realized performers."),
+    ("Model score", "The model's predicted relative return signal."),
 ]
 
 
@@ -139,463 +101,329 @@ def read_csv(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-def format_number(value: object) -> str:
+def format_number(value: object, digits: int = 3) -> str:
     if pd.isna(value):
-        return ""
-
-    if isinstance(value, (int, float)):
-        value = float(value)
-
-        if abs(value) >= 1000:
-            return f"{value:,.2f}"
-
-        return f"{value:.6f}".rstrip("0").rstrip(".")
-
-    return str(value)
-
-
-def format_percent(value: object) -> str:
-    if pd.isna(value):
-        return ""
+        return "N/A"
 
     try:
-        return f"{float(value) * 100:.2f}%"
-    except (TypeError, ValueError):
+        return f"{float(value):,.{digits}f}"
+    except Exception:
         return str(value)
 
 
-def format_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    formatted = df.copy()
+def format_percent(value: object, digits: int = 2) -> str:
+    if pd.isna(value):
+        return "N/A"
 
-    for column in formatted.columns:
-        if column in PERCENT_COLUMNS:
-            formatted[column] = formatted[column].map(format_percent)
-        elif pd.api.types.is_numeric_dtype(formatted[column]):
-            formatted[column] = formatted[column].map(format_number)
-
-    formatted = formatted.rename(columns=DISPLAY_NAMES)
-    return formatted
+    try:
+        return f"{float(value) * 100:,.{digits}f}%"
+    except Exception:
+        return str(value)
 
 
-def table_html(title: str, df: pd.DataFrame, note: str = "") -> str:
-    if df.empty:
-        body = '<p class="muted">Table not found or empty.</p>'
-    else:
-        body = format_dataframe(df).to_html(
-            index=False,
-            escape=True,
-            classes="data-table",
-            border=0,
+def format_table(
+    data: pd.DataFrame,
+    max_rows: int = 20,
+    percent_columns: set[str] | None = None,
+    decimal_columns: set[str] | None = None,
+) -> str:
+    if data.empty:
+        return '<p class="muted">No data available.</p>'
+
+    percent_columns = percent_columns or set()
+    decimal_columns = decimal_columns or set()
+
+    display = data.head(max_rows).copy()
+
+    for column in display.columns:
+        if column in percent_columns:
+            display[column] = display[column].map(format_percent)
+        elif column in decimal_columns:
+            display[column] = display[column].map(lambda value: format_number(value, 4))
+
+    return display.to_html(index=False, classes="data-table", border=0, escape=True)
+
+
+def latest_signal_date() -> str:
+    if not TREE_PREDICTIONS_PATH.exists():
+        return "N/A"
+
+    predictions = pd.read_parquet(TREE_PREDICTIONS_PATH)
+    predictions["date"] = pd.to_datetime(predictions["date"])
+
+    return predictions["date"].max().strftime("%Y-%m-%d")
+
+
+def metric_card(title: str, value: str, subtext: str) -> str:
+    return f"""
+      <div class="metric-card">
+        <div class="metric-title">{escape(title)}</div>
+        <div class="metric-value">{escape(value)}</div>
+        <div class="metric-subtext">{escape(subtext)}</div>
+      </div>
+    """
+
+
+def summary_cards_html() -> str:
+    horizon = read_csv(HORIZON_RESULTS_PATH)
+    ablation = read_csv(ABLATION_RESULTS_PATH)
+
+    cards = []
+
+    if not horizon.empty:
+        best_sharpe = horizon.loc[horizon["diagnostic_sharpe"].idxmax()]
+        best_rank_ic = horizon.loc[horizon["average_rank_ic"].idxmax()]
+
+        cards.append(
+            metric_card(
+                "Best horizon by Sharpe",
+                f'{int(best_sharpe["forecast_horizon_days"])}d',
+                f'Sharpe {format_number(best_sharpe["diagnostic_sharpe"])}',
+            )
+        )
+        cards.append(
+            metric_card(
+                "Best horizon by Rank IC",
+                f'{int(best_rank_ic["forecast_horizon_days"])}d',
+                f'Rank IC {format_number(best_rank_ic["average_rank_ic"])}',
+            )
         )
 
-    note_html = f'<p class="muted">{escape(note)}</p>' if note else ""
+    if not ablation.empty:
+        best_ablation = ablation.loc[ablation["diagnostic_sharpe"].idxmax()]
+        cards.append(
+            metric_card(
+                "Best feature set",
+                str(best_ablation["ablation_name"]),
+                f'Sharpe {format_number(best_ablation["diagnostic_sharpe"])}',
+            )
+        )
+
+    cards.append(
+        metric_card(
+            "Latest signal date",
+            latest_signal_date(),
+            "latest processed model ranking",
+        )
+    )
+
+    return "\n".join(cards)
+
+
+def latest_stock_ranking() -> pd.DataFrame:
+    if not TREE_PREDICTIONS_PATH.exists():
+        return pd.DataFrame()
+
+    predictions = pd.read_parquet(TREE_PREDICTIONS_PATH)
+    predictions["date"] = pd.to_datetime(predictions["date"])
+
+    latest_date = predictions["date"].max()
+    latest = predictions[
+        predictions["date"].eq(latest_date)
+        & predictions["model_name"].eq("gradient_boosting")
+    ].copy()
+
+    if latest.empty:
+        latest = predictions[predictions["date"].eq(latest_date)].copy()
+
+    latest = latest.sort_values("predicted_return", ascending=False)
+    latest["rank"] = range(1, len(latest) + 1)
+
+    latest = latest[
+        ["rank", "ticker", "date", "model_name", "predicted_return", "actual_return"]
+    ].rename(
+        columns={
+            "date": "signal_date",
+            "model_name": "model",
+            "predicted_return": "model_score",
+            "actual_return": "realized_forward_return",
+        }
+    )
+
+    latest["signal_date"] = pd.to_datetime(latest["signal_date"]).dt.strftime("%Y-%m-%d")
+
+    return latest
+
+
+def latest_portfolio_weights() -> pd.DataFrame:
+    if not OPTIMIZED_WEIGHTS_PATH.exists():
+        return pd.DataFrame()
+
+    weights = pd.read_parquet(OPTIMIZED_WEIGHTS_PATH)
+    weights["date"] = pd.to_datetime(weights["date"])
+
+    latest_date = weights["date"].max()
+    latest = weights[weights["date"].eq(latest_date)].copy()
+    preferred = latest[latest["optimization_mode"].eq("normal")].copy()
+
+    if preferred.empty:
+        preferred = latest.copy()
+
+    preferred = preferred[
+        ["date", "ticker", "issuer_group", "optimization_mode", "weight", "predicted_return", "actual_return"]
+    ].sort_values(
+        ["optimization_mode", "weight", "predicted_return"],
+        ascending=[True, False, False],
+    )
+
+    preferred["date"] = preferred["date"].dt.strftime("%Y-%m-%d")
+
+    return preferred.rename(
+        columns={
+            "date": "signal_date",
+            "predicted_return": "model_score",
+            "actual_return": "realized_forward_return",
+        }
+    )
+
+
+def horizon_table_html() -> str:
+    horizon = read_csv(HORIZON_RESULTS_PATH)
+
+    columns = [
+        "forecast_horizon_days",
+        "evaluated_dates",
+        "average_rank_ic",
+        "average_top_5_hit_rate",
+        "average_after_cost_return",
+        "diagnostic_sharpe",
+        "max_active_drawdown",
+        "average_turnover",
+        "final_cumulative_after_cost_active_return",
+    ]
+
+    available = [column for column in columns if column in horizon.columns]
+
+    return format_table(
+        horizon[available],
+        percent_columns={
+            "average_top_5_hit_rate",
+            "average_after_cost_return",
+            "max_active_drawdown",
+            "average_turnover",
+        },
+        decimal_columns={
+            "average_rank_ic",
+            "diagnostic_sharpe",
+            "final_cumulative_after_cost_active_return",
+        },
+    )
+
+
+def ablation_table_html() -> str:
+    ablation = read_csv(ABLATION_RESULTS_PATH)
+
+    columns = [
+        "ablation_name",
+        "evaluated_dates",
+        "feature_count",
+        "average_rank_ic",
+        "average_top_5_hit_rate",
+        "average_after_cost_return",
+        "diagnostic_sharpe",
+        "max_active_drawdown",
+        "average_turnover",
+        "final_cumulative_after_cost_active_return",
+    ]
+
+    available = [column for column in columns if column in ablation.columns]
+
+    return format_table(
+        ablation[available],
+        percent_columns={
+            "average_top_5_hit_rate",
+            "average_after_cost_return",
+            "max_active_drawdown",
+            "average_turnover",
+        },
+        decimal_columns={
+            "average_rank_ic",
+            "diagnostic_sharpe",
+            "final_cumulative_after_cost_active_return",
+        },
+    )
+
+
+def interactive_section_html(item: dict[str, str]) -> str:
+    path = REPORTS_DIR / item["file"]
+
+    if not path.exists():
+        return ""
+
+    versioned = f'{item["file"]}?v={int(path.stat().st_mtime)}'
 
     return f"""
-    <section class="panel">
-      <h2>{escape(title)}</h2>
-      {note_html}
-      <div class="table-wrap">
-        {body}
+    <section class="interactive-card">
+      <h2>{escape(item["title"])}</h2>
+      <p class="helper">
+        Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
+        Double-click a legend item to isolate it.
+      </p>
+      <iframe src="{escape(versioned)}" title="{escape(item["title"])}" loading="lazy"></iframe>
+      <div class="annotation">
+        <p><strong>What this means:</strong> {escape(item["meaning"])}</p>
+        <p><strong>How to read it:</strong> {escape(item["read"])}</p>
+        <p><strong>What to watch:</strong> {escape(item["watch"])}</p>
       </div>
     </section>
     """
 
 
-def card_html(title: str, value: str, subtitle: str = "") -> str:
-    subtitle_html = f'<div class="card-subtitle">{escape(subtitle)}</div>' if subtitle else ""
-
-    return f"""
-    <div class="card">
-      <div class="card-title">{escape(title)}</div>
-      <div class="card-value">{escape(value)}</div>
-      {subtitle_html}
-    </div>
-    """
-
-
-def best_row_value(
-    df: pd.DataFrame,
-    label_column: str,
-    value_column: str,
-) -> tuple[str, str]:
-    if df.empty or label_column not in df.columns or value_column not in df.columns:
-        return "N/A", "N/A"
-
-    values = pd.to_numeric(df[value_column], errors="coerce")
-
-    if values.dropna().empty:
-        return "N/A", "N/A"
-
-    index = values.idxmax()
-    return str(df.loc[index, label_column]), format_number(values.loc[index])
-
-
-def latest_stock_ranking() -> tuple[pd.DataFrame, str]:
-    prediction_path = DATA_DIR / "tree_model_predictions.parquet"
-    weight_path = DATA_DIR / "optimized_weights.parquet"
-
-    if not prediction_path.exists():
-        return pd.DataFrame(), "N/A"
-
-    predictions = pd.read_parquet(prediction_path)
-
-    if predictions.empty:
-        return pd.DataFrame(), "N/A"
-
-    if "model_name" in predictions.columns:
-        gradient_boosting = predictions[predictions["model_name"].eq("gradient_boosting")]
-
-        if not gradient_boosting.empty:
-            predictions = gradient_boosting
-
-    predictions = predictions.copy()
-    predictions["date"] = pd.to_datetime(predictions["date"])
-    latest_date = predictions["date"].max()
-
-    latest = (
-        predictions[predictions["date"].eq(latest_date)]
-        .sort_values("predicted_return", ascending=False)
-        .reset_index(drop=True)
-    )
-
-    latest["rank"] = latest.index + 1
-
-    ranking = latest[
-        ["rank", "ticker", "predicted_return", "actual_return", "model_name"]
-    ].rename(
-        columns={
-            "predicted_return": "model_score",
-            "actual_return": "realized_forward_return",
-            "model_name": "model",
-        }
-    )
-
-    ranking["signal_date"] = latest_date.date().isoformat()
-
-    if weight_path.exists():
-        weights = pd.read_parquet(weight_path)
-
-        if not weights.empty:
-            weights = weights.copy()
-            weights["date"] = pd.to_datetime(weights["date"])
-            latest_weights = weights[weights["date"].eq(latest_date)].copy()
-
-            if "optimization_mode" in latest_weights.columns:
-                herding_aware = latest_weights[
-                    latest_weights["optimization_mode"].eq("herding_aware")
-                ]
-
-                if not herding_aware.empty:
-                    latest_weights = herding_aware
-
-            weight_columns = [
-                column
-                for column in ["ticker", "weight", "issuer_group", "optimization_mode"]
-                if column in latest_weights.columns
-            ]
-
-            ranking = ranking.merge(
-                latest_weights[weight_columns],
-                on="ticker",
-                how="left",
-            )
-
-    if "weight" in ranking.columns:
-        ranking["weight"] = ranking["weight"].fillna(0.0)
-
-    columns = [
-        column
-        for column in [
-            "rank",
-            "ticker",
-            "signal_date",
-            "model",
-            "model_score",
-            "weight",
-            "issuer_group",
-            "optimization_mode",
-            "realized_forward_return",
-        ]
-        if column in ranking.columns
-    ]
-
-    return ranking[columns].head(15), latest_date.date().isoformat()
-
-
-def latest_portfolio_weights() -> tuple[pd.DataFrame, str]:
-    weight_path = DATA_DIR / "optimized_weights.parquet"
-
-    if not weight_path.exists():
-        return pd.DataFrame(), "N/A"
-
-    weights = pd.read_parquet(weight_path)
-
-    if weights.empty:
-        return pd.DataFrame(), "N/A"
-
-    weights = weights.copy()
-    weights["date"] = pd.to_datetime(weights["date"])
-    latest_date = weights["date"].max()
-    latest = weights[weights["date"].eq(latest_date)].copy()
-
-    if "optimization_mode" in latest.columns:
-        herding_aware = latest[latest["optimization_mode"].eq("herding_aware")]
-
-        if not herding_aware.empty:
-            latest = herding_aware
-
-    latest = latest.sort_values("weight", ascending=False)
-
-    columns = [
-        column
-        for column in [
-            "ticker",
-            "weight",
-            "issuer_group",
-            "predicted_return",
-            "actual_return",
-            "optimization_mode",
-            "portfolio_turnover",
-            "high_herding_day",
-        ]
-        if column in latest.columns
-    ]
-
-    return latest[columns], latest_date.date().isoformat()
-
-
-def figure_html(filename: str) -> str:
-    path = FIGURES_DIR / filename
+def static_section_html(item: dict[str, str]) -> str:
+    path = REPORTS_DIR / item["file"]
 
     if not path.exists() or path.stat().st_size == 0:
         return ""
 
-    title = filename.replace("_", " ").replace(".png", "").title()
-    note = FIGURE_NOTES.get(
-        filename,
-        {
-            "meaning": "This is one of the original research figures generated by the project.",
-            "read": "Use the graph to inspect one part of model, portfolio, or backtest behavior.",
-            "limit": "If the graph is visually crowded, it should be improved in the original visualization script.",
-        },
-    )
+    return f"""
+      <article class="static-card">
+        <h3>{escape(item["title"])}</h3>
+        <img src="{escape(item["file"])}" alt="{escape(item["title"])}">
+        <div class="small-note">
+          <p><strong>Meaning:</strong> {escape(item["meaning"])}</p>
+          <p><strong>Read:</strong> {escape(item["read"])}</p>
+        </div>
+      </article>
+    """
+
+
+def static_grid_html() -> str:
+    cards = "\n".join(static_section_html(item) for item in STATIC_SECTIONS)
 
     return f"""
-    <figure class="figure-card">
-      <img src="figures/{escape(filename)}" alt="{escape(title)}">
-      <figcaption>{escape(title)}</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> {escape(note["meaning"])}</p>
-        <p><strong>How to read it:</strong> {escape(note["read"])}</p>
-        <p><strong>Current limitation:</strong> {escape(note["limit"])}</p>
+    <section class="section-card">
+      <h2>Additional static diagnostics</h2>
+      <div class="static-grid">
+        {cards}
       </div>
-    </figure>
+    </section>
     """
 
 
 def glossary_html() -> str:
-    rows = [
-        (
-            "Rank",
-            "The position of a stock in the latest model ranking. Rank 1 means the model gives that stock the strongest score on the latest signal date.",
-            "Lower rank number is better.",
-        ),
-        (
-            "Ticker",
-            "The stock code, such as FPT, VCB, VIC, or HPG.",
-            "Used to identify each VN30 stock.",
-        ),
-        (
-            "Signal date",
-            "The date when the model ranking or portfolio signal was generated from the processed dataset.",
-            "This is not automatically today's live trading date.",
-        ),
-        (
-            "Model score / predicted return",
-            "The model's estimated relative-return signal for a stock. It is best understood as a score for ranking stocks, not as a guaranteed future return.",
-            "Higher is better.",
-        ),
-        (
-            "Realized forward return",
-            "The return that actually happened after the signal date over the target horizon. This is used to evaluate the model after the fact.",
-            "This is not known when the model makes the prediction.",
-        ),
-        (
-            "Portfolio weight",
-            "The percentage of the research portfolio allocated to a stock. For example, 20% means one-fifth of the portfolio goes into that stock.",
-            "Higher means the optimizer selected more of that stock.",
-        ),
-        (
-            "Issuer group",
-            "A grouping used to identify related companies, such as Vingroup names. This helps detect concentration risk.",
-            "Useful for checking whether the portfolio is too concentrated.",
-        ),
-        (
-            "Optimization mode",
-            "The portfolio construction rule used after model ranking. For example, herding-aware mode tries to account for crowding or related-stock behavior.",
-            "Different modes test different portfolio assumptions.",
-        ),
-        (
-            "Forecast horizon",
-            "How far ahead the model tries to predict. In this project, the tested horizons are 1 day, 5 days, and 10 days.",
-            "The best horizon is the one with stronger ranking and backtest evidence.",
-        ),
-        (
-            "Target label",
-            "The exact future-return variable the model is trained to predict, such as forward_relative_return_5d or forward_relative_return_10d.",
-            "It defines the prediction task.",
-        ),
-        (
-            "Evaluated dates",
-            "The number of dates included in the backtest or evaluation.",
-            "More evaluated dates usually means more evidence.",
-        ),
-        (
-            "Feature count",
-            "The number of input variables used by the model.",
-            "More features is not always better; ablation tests check whether features add value.",
-        ),
-        (
-            "Rank IC",
-            "Rank Information Coefficient. It measures whether the model ranked future winners above future losers. It focuses on ordering, not exact return prediction.",
-            "Higher is better. Near zero means weak ranking ability. Negative means the ranking may be wrong-way.",
-        ),
-        (
-            "Average Rank IC",
-            "The average Rank IC across all evaluated dates.",
-            "Higher means the ranking signal was more consistently useful.",
-        ),
-        (
-            "Top-5 hit rate",
-            "How often the model's top-ranked stocks ended up being among the stronger realized performers.",
-            "Higher is better.",
-        ),
-        (
-            "Average top-5 realized return",
-            "The average future return of the stocks selected near the top of the ranking.",
-            "Higher means the model's preferred stocks performed better afterward.",
-        ),
-        (
-            "Average selected stocks",
-            "The average number of stocks selected into the portfolio.",
-            "This shows how concentrated or diversified the strategy is.",
-        ),
-        (
-            "Average after-cost return",
-            "The average return after estimated commission, slippage, and liquidity costs.",
-            "Higher is better. This matters more than before-cost return.",
-        ),
-        (
-            "Return volatility",
-            "How much the strategy's returns fluctuate. Higher volatility means returns are less stable.",
-            "Lower is usually more comfortable, but it must be compared with return.",
-        ),
-        (
-            "Diagnostic Sharpe",
-            "A simple risk-adjusted performance measure. It compares average return with return volatility.",
-            "Higher is better. Negative means poor risk-adjusted performance.",
-        ),
-        (
-            "Max active drawdown",
-            "The worst fall from a previous peak in the active-return path.",
-            "Closer to zero is better. Large negative values mean painful losing periods.",
-        ),
-        (
-            "Average turnover",
-            "The average amount of portfolio change between rebalancing dates.",
-            "Lower is easier to trade. Very high turnover creates more trading costs.",
-        ),
-        (
-            "Maximum turnover",
-            "The largest single-period portfolio change in the backtest.",
-            "High maximum turnover can signal unrealistic trading pressure.",
-        ),
-        (
-            "Final cumulative after-cost active return",
-            "The final compounded value of the strategy's active return after estimated trading costs.",
-            "Higher is better, but it must be judged together with drawdown and turnover.",
-        ),
-        (
-            "Feature ablation",
-            "A test where one group of features is removed to see whether model performance gets worse.",
-            "If removing a feature group hurts performance, that group likely adds useful information.",
-        ),
-        (
-            "Full feature set",
-            "The model version that uses all available feature groups.",
-            "It should ideally outperform reduced versions.",
-        ),
-        (
-            "Without herding",
-            "A feature-ablation version where herding-related features are removed.",
-            "If performance falls, herding features are useful.",
-        ),
-        (
-            "Without price limit",
-            "A feature-ablation version where Vietnam price-limit features are removed.",
-            "If performance falls, price-limit features are useful.",
-        ),
-        (
-            "Without risk",
-            "A feature-ablation version where risk-related features are removed.",
-            "If performance falls, risk features are useful.",
-        ),
-        (
-            "Without volume/liquidity",
-            "A feature-ablation version where volume and liquidity features are removed.",
-            "If performance falls, liquidity features are useful.",
-        ),
-        (
-            "Active return",
-            "The strategy's return compared with the benchmark or active-return baseline used in the project.",
-            "Positive active return means the strategy beats the baseline.",
-        ),
-        (
-            "After-cost active return",
-            "Active return after estimated trading costs.",
-            "This is more realistic than before-cost active return.",
-        ),
-        (
-            "Drawdown",
-            "The fall from a previous high point.",
-            "Large drawdowns mean the strategy can lose a lot before recovering.",
-        ),
-        (
-            "Turnover",
-            "How much the portfolio changes from one rebalance to the next.",
-            "More turnover usually means more trading cost and lower live-trading realism.",
-        ),
-    ]
-
-    body = "\n".join(
+    rows = "\n".join(
         f"""
         <tr>
           <td>{escape(term)}</td>
-          <td>{escape(meaning)}</td>
-          <td>{escape(direction)}</td>
+          <td>{escape(explanation)}</td>
         </tr>
         """
-        for term, meaning, direction in rows
+        for term, explanation in GLOSSARY_ROWS
     )
 
     return f"""
-    <section class="panel">
-      <h2>Metric Glossary: What The Measured Data Means</h2>
-      <p class="muted">
-        This section explains the table columns and graph concepts in plain language.
-        Read this if Rank IC, Sharpe, drawdown, turnover, or model score is unclear.
-      </p>
+    <section class="section-card">
+      <h2>Glossary: what the metrics mean</h2>
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Metric / concept</th>
-              <th>Meaning</th>
-              <th>How to interpret it</th>
+              <th>Term</th>
+              <th>Simple meaning</th>
             </tr>
           </thead>
           <tbody>
-            {body}
+            {rows}
           </tbody>
         </table>
       </div>
@@ -603,59 +431,13 @@ def glossary_html() -> str:
     """
 
 
-def report_links_html() -> str:
-    links = []
+def page_html() -> str:
+    ranking = latest_stock_ranking()
+    weights = latest_portfolio_weights()
 
-    for label, href in REPORT_LINKS:
-        target = (REPORTS_DIR / href).resolve()
-        status = "available" if target.exists() else "missing"
-        links.append(
-            f'<a class="report-link {status}" href="{escape(href)}">{escape(label)}</a>'
-        )
-
-    return "\n".join(links)
-
-
-def build_html() -> str:
-    horizon_df = read_csv(TABLES_DIR / "horizon_results.csv")
-    ablation_df = read_csv(TABLES_DIR / "ablation_results.csv")
-    ranking_df, ranking_date = latest_stock_ranking()
-    portfolio_df, portfolio_date = latest_portfolio_weights()
-
-    best_horizon, best_horizon_sharpe = best_row_value(
-        horizon_df,
-        "forecast_horizon_days",
-        "diagnostic_sharpe",
-    )
-
-    best_rank_ic_horizon, best_rank_ic = best_row_value(
-        horizon_df,
-        "forecast_horizon_days",
-        "average_rank_ic",
-    )
-
-    best_feature_set, best_feature_sharpe = best_row_value(
-        ablation_df,
-        "ablation_name",
-        "diagnostic_sharpe",
-    )
-
-    figure_cards = "\n".join(figure_html(filename) for filename in FIGURE_ORDER)
-
-    figure_count = sum(
-        1
-        for filename in FIGURE_ORDER
-        if (FIGURES_DIR / filename).exists() and (FIGURES_DIR / filename).stat().st_size > 0
-    )
-
-    cards = "\n".join(
-        [
-            card_html("Best horizon", best_horizon, f"Diagnostic Sharpe {best_horizon_sharpe}"),
-            card_html("Best ranking quality", best_rank_ic_horizon, f"Rank IC {best_rank_ic}"),
-            card_html("Best feature set", best_feature_set, f"Diagnostic Sharpe {best_feature_sharpe}"),
-            card_html("Latest signal date", ranking_date, "latest processed model ranking"),
-            card_html("Figures", f"{figure_count} / {len(FIGURE_ORDER)}", "original research figures"),
-        ]
+    interactive_sections = "\n".join(
+        interactive_section_html(item)
+        for item in INTERACTIVE_SECTIONS
     )
 
     return f"""<!doctype html>
@@ -669,11 +451,11 @@ def build_html() -> str:
       --bg: #0f172a;
       --panel: #111827;
       --panel-soft: #1f2937;
+      --line: #334155;
       --text: #e5e7eb;
       --muted: #9ca3af;
-      --line: #374151;
-      --accent: #38bdf8;
-      --bad: #ef4444;
+      --accent: #7dd3fc;
+      --white: #ffffff;
     }}
 
     * {{
@@ -682,86 +464,90 @@ def build_html() -> str:
 
     body {{
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
       color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
       line-height: 1.5;
     }}
 
     header {{
-      padding: 40px 48px 24px;
+      padding: 42px 46px 34px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(135deg, #0f172a 0%, #111827 60%, #1e293b 100%);
     }}
 
-    header h1 {{
-      margin: 0 0 8px;
-      font-size: 34px;
-      letter-spacing: -0.03em;
+    h1 {{
+      margin: 0 0 12px;
+      font-size: 42px;
+      line-height: 1.1;
     }}
 
-    header p {{
-      margin: 0;
+    h2 {{
+      margin: 0 0 16px;
+      font-size: 26px;
+    }}
+
+    h3 {{
+      margin: 0 0 12px;
+      font-size: 18px;
+    }}
+
+    .subtitle {{
+      max-width: 1100px;
       color: var(--muted);
-      max-width: 900px;
+      font-size: 18px;
     }}
 
     main {{
-      padding: 32px 48px 56px;
-      max-width: 1500px;
-      margin: 0 auto;
+      width: min(1500px, calc(100% - 64px));
+      margin: 34px auto 60px;
     }}
 
-    .cards {{
+    .metric-grid {{
       display: grid;
-      grid-template-columns: repeat(5, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 26px;
     }}
 
-    .card, .panel, .figure-card {{
-      background: var(--panel);
+    .metric-card,
+    .section-card,
+    .interactive-card {{
       border: 1px solid var(--line);
-      border-radius: 16px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+      margin-bottom: 26px;
     }}
 
-    .card {{
-      padding: 20px;
+    .metric-card {{
+      padding: 24px;
     }}
 
-    .card-title {{
+    .metric-title {{
       color: var(--muted);
-      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-bottom: 10px;
-    }}
-
-    .card-value {{
-      font-size: 30px;
+      font-size: 13px;
       font-weight: 700;
+      margin-bottom: 14px;
+    }}
+
+    .metric-value {{
       color: var(--accent);
+      font-size: 34px;
+      font-weight: 800;
+      margin-bottom: 8px;
     }}
 
-    .card-subtitle {{
+    .metric-subtext,
+    .muted,
+    .helper {{
       color: var(--muted);
-      margin-top: 6px;
-      font-size: 14px;
     }}
 
-    .panel, .figure-card {{
+    .section-card,
+    .interactive-card {{
       padding: 24px;
-      margin-bottom: 24px;
-    }}
-
-    .panel h2 {{
-      margin: 0 0 14px;
-      font-size: 22px;
-    }}
-
-    .muted {{
-      color: var(--muted);
     }}
 
     .table-wrap {{
@@ -774,95 +560,132 @@ def build_html() -> str:
       font-size: 14px;
     }}
 
-    .data-table th, .data-table td {{
-      border-bottom: 1px solid var(--line);
-      padding: 10px 12px;
+    .data-table th {{
+      background: var(--panel-soft);
+      color: var(--text);
       text-align: left;
+      padding: 11px 12px;
       white-space: nowrap;
     }}
 
-    .data-table th {{
+    .data-table td {{
+      border-top: 1px solid var(--line);
+      padding: 10px 12px;
       color: var(--text);
-      background: var(--panel-soft);
+      white-space: nowrap;
     }}
 
-    .figure-card img {{
+    .interactive-card iframe {{
       display: block;
       width: 100%;
-      max-height: 780px;
-      object-fit: contain;
-      border-radius: 12px;
-      background: white;
+      height: 610px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--white);
+      margin: 14px 0 0;
     }}
 
-    .figure-card figcaption {{
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 14px;
-    }}
-
-    .figure-note {{
+    .annotation {{
       margin-top: 16px;
-      background: var(--panel-soft);
+      padding: 18px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 14px;
+      background: var(--panel-soft);
+      color: var(--muted);
+    }}
+
+    .annotation p {{
+      margin: 0;
+    }}
+
+    .annotation p + p {{
+      margin-top: 10px;
+    }}
+
+    .annotation strong,
+    .small-note strong {{
+      color: var(--text);
+    }}
+
+    .static-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }}
+
+    .static-card {{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-soft);
       padding: 16px;
+      min-width: 0;
+    }}
+
+    .static-card img {{
+      display: block;
+      width: 100%;
+      height: 300px;
+      object-fit: contain;
+      background: var(--white);
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }}
+
+    .small-note {{
       color: var(--muted);
-      font-size: 15px;
-    }}
-
-    .figure-note p {{
-      margin: 0 0 10px;
-    }}
-
-    .figure-note strong {{
-      color: var(--text);
-    }}
-
-    .links {{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }}
-
-    .report-link {{
-      display: inline-block;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      color: var(--text);
-      text-decoration: none;
-      background: var(--panel-soft);
-    }}
-
-    .report-link:hover {{
-      border-color: var(--accent);
-    }}
-
-    .report-link.missing {{
-      color: var(--bad);
-    }}
-
-    footer {{
-      color: var(--muted);
-      padding-top: 16px;
       font-size: 13px;
     }}
 
+    .small-note p {{
+      margin: 0;
+    }}
+
+    .small-note p + p {{
+      margin-top: 8px;
+    }}
+
+    .disclaimer {{
+      margin-top: 24px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-soft);
+      color: var(--muted);
+    }}
+
     @media (max-width: 1100px) {{
-      .cards {{
-        grid-template-columns: repeat(2, minmax(160px, 1fr));
+      .metric-grid {{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }}
+
+      .static-grid {{
+        grid-template-columns: 1fr;
+      }}
+
+      main {{
+        width: min(100% - 28px, 1500px);
+      }}
+
+      header {{
+        padding: 30px 24px;
       }}
     }}
 
-    @media (max-width: 560px) {{
-      header, main {{
-        padding-left: 20px;
-        padding-right: 20px;
+    @media (max-width: 700px) {{
+      .metric-grid {{
+        grid-template-columns: 1fr;
       }}
 
-      .cards {{
-        grid-template-columns: 1fr;
+      h1 {{
+        font-size: 32px;
+      }}
+
+      .interactive-card iframe {{
+        height: 560px;
+      }}
+
+      .static-card img {{
+        height: 250px;
       }}
     }}
   </style>
@@ -870,113 +693,69 @@ def build_html() -> str:
 <body>
   <header>
     <h1>VN30 Long-Only ML Research Dashboard</h1>
-    <p>
-      Static dashboard generated from the original project reports, tables, and figures.
-      This page explains the latest model ranking, portfolio weights, backtest evidence,
-      and current limitations. It is a research dashboard, not a live trading system.
+    <p class="subtitle">
+      Interactive dashboard generated from the VN30 machine-learning framework.
+      This page is a research summary, not an investment recommendation.
     </p>
   </header>
 
   <main>
-    <section class="cards">
-      {cards}
+    <section class="metric-grid">
+      {summary_cards_html()}
     </section>
 
-    <section class="panel">
-      <h2>What This Dashboard Provides</h2>
-      <p class="muted">
-        This dashboard summarizes the model's latest processed VN30 ranking, the research portfolio selected from that ranking,
-        the backtest evidence, and the limitations of the current framework.
-      </p>
+    <section class="section-card">
+      <h2>Latest stock ranking</h2>
+      <p class="muted">Stocks ranked by the latest gradient boosting model score.</p>
       <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Provides</th>
-              <th>Does not provide</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Latest processed VN30 stock ranking</td>
-              <td>Live broker-ready trading orders</td>
-            </tr>
-            <tr>
-              <td>Long-only research portfolio weights</td>
-              <td>Guaranteed return or risk-free recommendation</td>
-            </tr>
-            <tr>
-              <td>Backtest and robustness evidence</td>
-              <td>Point-in-time VN30 membership guarantee</td>
-            </tr>
-            <tr>
-              <td>Research signal based on local processed data</td>
-              <td>Personalized investment advice</td>
-            </tr>
-          </tbody>
-        </table>
+        {format_table(
+            ranking,
+            max_rows=15,
+            percent_columns={"model_score", "realized_forward_return"},
+        )}
       </div>
     </section>
 
-    {table_html(
-        "Latest VN30 Stock Ranking",
-        ranking_df,
-        "Stocks are ordered by the latest processed model score. Higher-ranked names are the stocks the model preferred on that signal date.",
-    )}
-
-    {table_html(
-        "Latest Optimized Portfolio Weights",
-        portfolio_df,
-        f"Latest selected research portfolio on {portfolio_date}. The preferred display uses herding-aware optimization when available.",
-    )}
-
-    {table_html(
-        "Forecast Horizon Results",
-        horizon_df,
-        "Compares whether the model works better with 1-day, 5-day, or 10-day prediction targets.",
-    )}
-
-    {table_html(
-        "Feature Ablation Results",
-        ablation_df,
-        "Compares the full feature set with versions where feature groups are removed.",
-    )}
-
-    <section class="panel">
-      <h2>Figures</h2>
-      <p class="muted">
-        These are the original research figures from reports/figures. The annotations explain how to read each graph.
-        If a graph is visually crowded, the next step is to improve the original visualization script rather than creating duplicate graphs.
-      </p>
+    <section class="section-card">
+      <h2>Latest optimized portfolio weights</h2>
+      <p class="muted">Latest generated long-only optimized weights from the framework.</p>
+      <div class="table-wrap">
+        {format_table(
+            weights,
+            max_rows=20,
+            percent_columns={"weight", "model_score", "realized_forward_return"},
+        )}
+      </div>
     </section>
 
-    {figure_cards}
+    <section class="section-card">
+      <h2>Forecast horizon results</h2>
+      <p class="muted">Compares whether 1-day, 5-day, or 10-day prediction targets work better.</p>
+      <div class="table-wrap">
+        {horizon_table_html()}
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Feature ablation results</h2>
+      <p class="muted">Checks whether the full feature set beats reduced feature groups.</p>
+      <div class="table-wrap">
+        {ablation_table_html()}
+      </div>
+    </section>
+
+    {interactive_sections}
+
+    {static_grid_html()}
 
     {glossary_html()}
 
-    <section class="panel">
-      <h2>What The Dashboard Means</h2>
-      <p>
-        The dashboard means that the project can generate a latest processed VN30 stock ranking,
-        convert that ranking into a constrained long-only research portfolio, and evaluate whether the signal was historically useful.
-      </p>
-      <p>
-        It does not mean the system is trade-ready. The current output is a research signal, not a broker-ready order list,
-        not a guaranteed return forecast, and not personalized investment advice.
-      </p>
+    <section class="disclaimer">
+      <strong>Research disclaimer:</strong>
+      This dashboard summarizes a historical research backtest. It is not trade-ready and does not account for
+      all live execution constraints, data-vendor issues, point-in-time VN30 membership, tax, borrow constraints,
+      or real-time market impact.
     </section>
-
-    <section class="panel">
-      <h2>Report Links</h2>
-      <p class="muted">Open the source reports for methodology, audit notes, and detailed results.</p>
-      <div class="links">
-        {report_links_html()}
-      </div>
-    </section>
-
-    <footer>
-      Generated locally from repository artifacts. Raw and processed data are intentionally kept out of Git.
-    </footer>
   </main>
 </body>
 </html>
@@ -985,16 +764,14 @@ def build_html() -> str:
 
 def main() -> None:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    html = build_html()
-    OUTPUT_PATH.write_text(html, encoding="utf-8", newline="\n")
+
+    html = page_html()
+    clean_html = "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
+    OUTPUT_PATH.write_text(clean_html, encoding="utf-8", newline="\n")
 
     print()
-    print("HTML dashboard generated:")
+    print("Fresh HTML dashboard generated:")
     print(f"  {OUTPUT_PATH}")
-    print()
-    print("Open with:")
-    print("  start .\\reports\\dashboard.html")
-    print()
 
 
 if __name__ == "__main__":

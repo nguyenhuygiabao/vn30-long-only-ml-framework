@@ -16,6 +16,10 @@ KEY_FILES = [
     ROOT / "reports" / "model_report.md",
     ROOT / "reports" / "data_quality_report.md",
     ROOT / "reports" / "dashboard.html",
+    ROOT / "reports" / "interactive" / "interactive_cumulative_return.html",
+    ROOT / "reports" / "interactive" / "interactive_active_drawdown.html",
+    ROOT / "reports" / "interactive" / "interactive_portfolio_turnover.html",
+    ROOT / "reports" / "interactive" / "interactive_rolling_diagnostic_sharpe.html",
     ROOT / "reports" / "tables" / "ablation_results.csv",
     ROOT / "reports" / "tables" / "horizon_results.csv",
     ROOT / "scripts" / "run_full_pipeline.py",
@@ -23,6 +27,7 @@ KEY_FILES = [
     ROOT / "scripts" / "report_summary.py",
     ROOT / "scripts" / "audit_project_state.py",
     ROOT / "scripts" / "build_html_report.py",
+    ROOT / "scripts" / "build_interactive_charts.py",
 ]
 
 GENERATED_PATH_PREFIXES = [

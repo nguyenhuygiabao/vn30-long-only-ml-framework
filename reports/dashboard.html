@@ -9,11 +9,11 @@
       --bg: #0f172a;
       --panel: #111827;
       --panel-soft: #1f2937;
+      --line: #334155;
       --text: #e5e7eb;
       --muted: #9ca3af;
-      --line: #374151;
-      --accent: #38bdf8;
-      --bad: #ef4444;
+      --accent: #7dd3fc;
+      --white: #ffffff;
     }
 
     * {
@@ -22,86 +22,90 @@
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
       color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
       line-height: 1.5;
     }
 
     header {
-      padding: 40px 48px 24px;
+      padding: 42px 46px 34px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(135deg, #0f172a 0%, #111827 60%, #1e293b 100%);
     }
 
-    header h1 {
-      margin: 0 0 8px;
-      font-size: 34px;
-      letter-spacing: -0.03em;
+    h1 {
+      margin: 0 0 12px;
+      font-size: 42px;
+      line-height: 1.1;
     }
 
-    header p {
-      margin: 0;
+    h2 {
+      margin: 0 0 16px;
+      font-size: 26px;
+    }
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .subtitle {
+      max-width: 1100px;
       color: var(--muted);
-      max-width: 900px;
+      font-size: 18px;
     }
 
     main {
-      padding: 32px 48px 56px;
-      max-width: 1500px;
-      margin: 0 auto;
+      width: min(1500px, calc(100% - 64px));
+      margin: 34px auto 60px;
     }
 
-    .cards {
+    .metric-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 26px;
     }
 
-    .card, .panel, .figure-card {
-      background: var(--panel);
+    .metric-card,
+    .section-card,
+    .interactive-card {
       border: 1px solid var(--line);
-      border-radius: 16px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+      margin-bottom: 26px;
     }
 
-    .card {
-      padding: 20px;
+    .metric-card {
+      padding: 24px;
     }
 
-    .card-title {
+    .metric-title {
       color: var(--muted);
-      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-bottom: 10px;
-    }
-
-    .card-value {
-      font-size: 30px;
+      font-size: 13px;
       font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .metric-value {
       color: var(--accent);
+      font-size: 34px;
+      font-weight: 800;
+      margin-bottom: 8px;
     }
 
-    .card-subtitle {
+    .metric-subtext,
+    .muted,
+    .helper {
       color: var(--muted);
-      margin-top: 6px;
-      font-size: 14px;
     }
 
-    .panel, .figure-card {
+    .section-card,
+    .interactive-card {
       padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .panel h2 {
-      margin: 0 0 14px;
-      font-size: 22px;
-    }
-
-    .muted {
-      color: var(--muted);
     }
 
     .table-wrap {
@@ -114,95 +118,132 @@
       font-size: 14px;
     }
 
-    .data-table th, .data-table td {
-      border-bottom: 1px solid var(--line);
-      padding: 10px 12px;
+    .data-table th {
+      background: var(--panel-soft);
+      color: var(--text);
       text-align: left;
+      padding: 11px 12px;
       white-space: nowrap;
     }
 
-    .data-table th {
+    .data-table td {
+      border-top: 1px solid var(--line);
+      padding: 10px 12px;
       color: var(--text);
-      background: var(--panel-soft);
+      white-space: nowrap;
     }
 
-    .figure-card img {
+    .interactive-card iframe {
       display: block;
       width: 100%;
-      max-height: 780px;
-      object-fit: contain;
-      border-radius: 12px;
-      background: white;
+      height: 610px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--white);
+      margin: 14px 0 0;
     }
 
-    .figure-card figcaption {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .figure-note {
+    .annotation {
       margin-top: 16px;
-      background: var(--panel-soft);
+      padding: 18px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 14px;
+      background: var(--panel-soft);
+      color: var(--muted);
+    }
+
+    .annotation p {
+      margin: 0;
+    }
+
+    .annotation p + p {
+      margin-top: 10px;
+    }
+
+    .annotation strong,
+    .small-note strong {
+      color: var(--text);
+    }
+
+    .static-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .static-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-soft);
       padding: 16px;
+      min-width: 0;
+    }
+
+    .static-card img {
+      display: block;
+      width: 100%;
+      height: 300px;
+      object-fit: contain;
+      background: var(--white);
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .small-note {
       color: var(--muted);
-      font-size: 15px;
-    }
-
-    .figure-note p {
-      margin: 0 0 10px;
-    }
-
-    .figure-note strong {
-      color: var(--text);
-    }
-
-    .links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .report-link {
-      display: inline-block;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      color: var(--text);
-      text-decoration: none;
-      background: var(--panel-soft);
-    }
-
-    .report-link:hover {
-      border-color: var(--accent);
-    }
-
-    .report-link.missing {
-      color: var(--bad);
-    }
-
-    footer {
-      color: var(--muted);
-      padding-top: 16px;
       font-size: 13px;
     }
 
+    .small-note p {
+      margin: 0;
+    }
+
+    .small-note p + p {
+      margin-top: 8px;
+    }
+
+    .disclaimer {
+      margin-top: 24px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-soft);
+      color: var(--muted);
+    }
+
     @media (max-width: 1100px) {
-      .cards {
-        grid-template-columns: repeat(2, minmax(160px, 1fr));
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .static-grid {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        width: min(100% - 28px, 1500px);
+      }
+
+      header {
+        padding: 30px 24px;
       }
     }
 
-    @media (max-width: 560px) {
-      header, main {
-        padding-left: 20px;
-        padding-right: 20px;
+    @media (max-width: 700px) {
+      .metric-grid {
+        grid-template-columns: 1fr;
       }
 
-      .cards {
-        grid-template-columns: 1fr;
+      h1 {
+        font-size: 32px;
+      }
+
+      .interactive-card iframe {
+        height: 560px;
+      }
+
+      .static-card img {
+        height: 250px;
       }
     }
   </style>
@@ -210,105 +251,57 @@
 <body>
   <header>
     <h1>VN30 Long-Only ML Research Dashboard</h1>
-    <p>
-      Static dashboard generated from the original project reports, tables, and figures.
-      This page explains the latest model ranking, portfolio weights, backtest evidence,
-      and current limitations. It is a research dashboard, not a live trading system.
+    <p class="subtitle">
+      Interactive dashboard generated from the VN30 machine-learning framework.
+      This page is a research summary, not an investment recommendation.
     </p>
   </header>
 
   <main>
-    <section class="cards">
-      
-    <div class="card">
-      <div class="card-title">Best horizon</div>
-      <div class="card-value">10</div>
-      <div class="card-subtitle">Diagnostic Sharpe 1.398924</div>
-    </div>
-    
+    <section class="metric-grid">
 
-    <div class="card">
-      <div class="card-title">Best ranking quality</div>
-      <div class="card-value">10</div>
-      <div class="card-subtitle">Rank IC 0.546504</div>
-    </div>
-    
-
-    <div class="card">
-      <div class="card-title">Best feature set</div>
-      <div class="card-value">all_features</div>
-      <div class="card-subtitle">Diagnostic Sharpe 0.840073</div>
-    </div>
-    
-
-    <div class="card">
-      <div class="card-title">Latest signal date</div>
-      <div class="card-value">2026-06-23</div>
-      <div class="card-subtitle">latest processed model ranking</div>
-    </div>
-    
-
-    <div class="card">
-      <div class="card-title">Figures</div>
-      <div class="card-value">8 / 8</div>
-      <div class="card-subtitle">original research figures</div>
-    </div>
-    
-    </section>
-
-    <section class="panel">
-      <h2>What This Dashboard Provides</h2>
-      <p class="muted">
-        This dashboard summarizes the model's latest processed VN30 ranking, the research portfolio selected from that ranking,
-        the backtest evidence, and the limitations of the current framework.
-      </p>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Provides</th>
-              <th>Does not provide</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Latest processed VN30 stock ranking</td>
-              <td>Live broker-ready trading orders</td>
-            </tr>
-            <tr>
-              <td>Long-only research portfolio weights</td>
-              <td>Guaranteed return or risk-free recommendation</td>
-            </tr>
-            <tr>
-              <td>Backtest and robustness evidence</td>
-              <td>Point-in-time VN30 membership guarantee</td>
-            </tr>
-            <tr>
-              <td>Research signal based on local processed data</td>
-              <td>Personalized investment advice</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="metric-card">
+        <div class="metric-title">Best horizon by Sharpe</div>
+        <div class="metric-value">10d</div>
+        <div class="metric-subtext">Sharpe 1.399</div>
       </div>
+
+
+      <div class="metric-card">
+        <div class="metric-title">Best horizon by Rank IC</div>
+        <div class="metric-value">10d</div>
+        <div class="metric-subtext">Rank IC 0.547</div>
+      </div>
+
+
+      <div class="metric-card">
+        <div class="metric-title">Best feature set</div>
+        <div class="metric-value">all_features</div>
+        <div class="metric-subtext">Sharpe 0.840</div>
+      </div>
+
+
+      <div class="metric-card">
+        <div class="metric-title">Latest signal date</div>
+        <div class="metric-value">2026-06-23</div>
+        <div class="metric-subtext">latest processed model ranking</div>
+      </div>
+
     </section>
 
-    
-    <section class="panel">
-      <h2>Latest VN30 Stock Ranking</h2>
-      <p class="muted">Stocks are ordered by the latest processed model score. Higher-ranked names are the stocks the model preferred on that signal date.</p>
+    <section class="section-card">
+      <h2>Latest stock ranking</h2>
+      <p class="muted">Stocks ranked by the latest gradient boosting model score.</p>
       <div class="table-wrap">
         <table class="dataframe data-table">
   <thead>
     <tr style="text-align: right;">
-      <th>Rank</th>
-      <th>Ticker</th>
-      <th>Signal date</th>
-      <th>Model</th>
-      <th>Model score</th>
-      <th>Portfolio weight</th>
-      <th>Issuer group</th>
-      <th>Optimization mode</th>
-      <th>Realized forward return</th>
+      <th>rank</th>
+      <th>ticker</th>
+      <th>signal_date</th>
+      <th>model</th>
+      <th>model_score</th>
+      <th>realized_forward_return</th>
     </tr>
   </thead>
   <tbody>
@@ -318,9 +311,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>2.17%</td>
-      <td>20.00%</td>
-      <td>SeABank</td>
-      <td>herding_aware</td>
       <td>6.69%</td>
     </tr>
     <tr>
@@ -329,9 +319,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>1.64%</td>
-      <td>20.00%</td>
-      <td>Vingroup</td>
-      <td>herding_aware</td>
       <td>0.60%</td>
     </tr>
     <tr>
@@ -340,9 +327,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>1.64%</td>
-      <td>20.00%</td>
-      <td>Vingroup</td>
-      <td>herding_aware</td>
       <td>-4.55%</td>
     </tr>
     <tr>
@@ -351,9 +335,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>0.47%</td>
-      <td>20.00%</td>
-      <td>Vietcombank</td>
-      <td>herding_aware</td>
       <td>1.04%</td>
     </tr>
     <tr>
@@ -362,9 +343,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>0.29%</td>
-      <td>20.00%</td>
-      <td>Sabeco</td>
-      <td>herding_aware</td>
       <td>1.03%</td>
     </tr>
     <tr>
@@ -373,9 +351,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-0.07%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>-2.80%</td>
     </tr>
     <tr>
@@ -384,9 +359,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-0.68%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>2.37%</td>
     </tr>
     <tr>
@@ -395,9 +367,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-0.73%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>-1.09%</td>
     </tr>
     <tr>
@@ -406,9 +375,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-0.76%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>2.55%</td>
     </tr>
     <tr>
@@ -417,9 +383,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-0.77%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>-1.49%</td>
     </tr>
     <tr>
@@ -428,9 +391,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-0.93%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>1.02%</td>
     </tr>
     <tr>
@@ -439,9 +399,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-0.95%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>0.91%</td>
     </tr>
     <tr>
@@ -450,9 +407,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-1.00%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>1.29%</td>
     </tr>
     <tr>
@@ -461,9 +415,6 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-1.15%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>-0.87%</td>
     </tr>
     <tr>
@@ -472,674 +423,415 @@
       <td>2026-06-23</td>
       <td>gradient_boosting</td>
       <td>-1.25%</td>
-      <td>0.00%</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>4.20%</td>
     </tr>
   </tbody>
 </table>
       </div>
     </section>
-    
 
-    
-    <section class="panel">
-      <h2>Latest Optimized Portfolio Weights</h2>
-      <p class="muted">Latest selected research portfolio on 2026-06-23. The preferred display uses herding-aware optimization when available.</p>
+    <section class="section-card">
+      <h2>Latest optimized portfolio weights</h2>
+      <p class="muted">Latest generated long-only optimized weights from the framework.</p>
       <div class="table-wrap">
         <table class="dataframe data-table">
   <thead>
     <tr style="text-align: right;">
-      <th>Ticker</th>
-      <th>Portfolio weight</th>
-      <th>Issuer group</th>
-      <th>Predicted return</th>
-      <th>Realized forward return</th>
-      <th>Optimization mode</th>
-      <th>Portfolio turnover</th>
-      <th>High-herding day</th>
+      <th>signal_date</th>
+      <th>ticker</th>
+      <th>issuer_group</th>
+      <th>optimization_mode</th>
+      <th>weight</th>
+      <th>model_score</th>
+      <th>realized_forward_return</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>SAB</td>
-      <td>20.00%</td>
-      <td>Sabeco</td>
-      <td>0.29%</td>
-      <td>1.03%</td>
-      <td>herding_aware</td>
-      <td>40.00%</td>
-      <td>False</td>
-    </tr>
-    <tr>
+      <td>2026-06-23</td>
       <td>SSB</td>
-      <td>20.00%</td>
       <td>SeABank</td>
+      <td>normal</td>
+      <td>20.00%</td>
       <td>2.17%</td>
       <td>6.69%</td>
-      <td>herding_aware</td>
-      <td>40.00%</td>
-      <td>False</td>
     </tr>
     <tr>
-      <td>VCB</td>
-      <td>20.00%</td>
-      <td>Vietcombank</td>
-      <td>0.47%</td>
-      <td>1.04%</td>
-      <td>herding_aware</td>
-      <td>40.00%</td>
-      <td>False</td>
-    </tr>
-    <tr>
+      <td>2026-06-23</td>
       <td>VHM</td>
-      <td>20.00%</td>
       <td>Vingroup</td>
+      <td>normal</td>
+      <td>20.00%</td>
       <td>1.64%</td>
       <td>0.60%</td>
-      <td>herding_aware</td>
-      <td>40.00%</td>
-      <td>False</td>
     </tr>
     <tr>
+      <td>2026-06-23</td>
       <td>VIC</td>
-      <td>20.00%</td>
       <td>Vingroup</td>
+      <td>normal</td>
+      <td>20.00%</td>
       <td>1.64%</td>
       <td>-4.55%</td>
-      <td>herding_aware</td>
-      <td>40.00%</td>
-      <td>False</td>
+    </tr>
+    <tr>
+      <td>2026-06-23</td>
+      <td>VCB</td>
+      <td>Vietcombank</td>
+      <td>normal</td>
+      <td>20.00%</td>
+      <td>0.47%</td>
+      <td>1.04%</td>
+    </tr>
+    <tr>
+      <td>2026-06-23</td>
+      <td>SAB</td>
+      <td>Sabeco</td>
+      <td>normal</td>
+      <td>20.00%</td>
+      <td>0.29%</td>
+      <td>1.03%</td>
     </tr>
   </tbody>
 </table>
       </div>
     </section>
-    
 
-    
-    <section class="panel">
-      <h2>Forecast Horizon Results</h2>
-      <p class="muted">Compares whether the model works better with 1-day, 5-day, or 10-day prediction targets.</p>
+    <section class="section-card">
+      <h2>Forecast horizon results</h2>
+      <p class="muted">Compares whether 1-day, 5-day, or 10-day prediction targets work better.</p>
       <div class="table-wrap">
         <table class="dataframe data-table">
   <thead>
     <tr style="text-align: right;">
-      <th>Forecast horizon days</th>
-      <th>Target label</th>
-      <th>Evaluated dates</th>
-      <th>Feature count</th>
-      <th>Average Rank IC</th>
-      <th>Average top-5 hit rate</th>
-      <th>Average top-5 realized return</th>
-      <th>Average selected stocks</th>
-      <th>Average after-cost return</th>
-      <th>Return volatility</th>
-      <th>Diagnostic Sharpe</th>
-      <th>Max active drawdown</th>
-      <th>Average turnover</th>
-      <th>Maximum turnover</th>
-      <th>Final cumulative after-cost active return</th>
+      <th>forecast_horizon_days</th>
+      <th>evaluated_dates</th>
+      <th>average_rank_ic</th>
+      <th>average_top_5_hit_rate</th>
+      <th>average_after_cost_return</th>
+      <th>diagnostic_sharpe</th>
+      <th>max_active_drawdown</th>
+      <th>average_turnover</th>
+      <th>final_cumulative_after_cost_active_return</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>1</td>
-      <td>forward_relative_return_1d</td>
-      <td>1,613.00</td>
-      <td>51</td>
-      <td>-0.003844</td>
+      <td>1613</td>
+      <td>-0.0038</td>
       <td>44.79%</td>
-      <td>-0.01%</td>
-      <td>5</td>
       <td>-0.09%</td>
-      <td>0.66%</td>
-      <td>-0.140805</td>
+      <td>-0.1408</td>
       <td>-152.56%</td>
       <td>38.96%</td>
-      <td>40.00%</td>
-      <td>-1.508238</td>
+      <td>-1.5082</td>
     </tr>
     <tr>
       <td>5</td>
-      <td>forward_relative_return_5d</td>
-      <td>1,609.00</td>
-      <td>51</td>
-      <td>0.338033</td>
+      <td>1609</td>
+      <td>0.3380</td>
       <td>67.61%</td>
-      <td>2.36%</td>
-      <td>5</td>
       <td>1.82%</td>
-      <td>2.17%</td>
-      <td>0.840073</td>
+      <td>0.8401</td>
       <td>-35.59%</td>
       <td>35.46%</td>
-      <td>40.00%</td>
-      <td>29.360326</td>
+      <td>29.3603</td>
     </tr>
     <tr>
       <td>10</td>
-      <td>forward_relative_return_10d</td>
-      <td>1,604.00</td>
-      <td>51</td>
-      <td>0.546504</td>
+      <td>1604</td>
+      <td>0.5465</td>
       <td>80.11%</td>
-      <td>5.27%</td>
-      <td>5</td>
       <td>4.86%</td>
-      <td>3.47%</td>
-      <td>1.398924</td>
+      <td>1.3989</td>
       <td>-21.95%</td>
       <td>31.74%</td>
-      <td>40.00%</td>
-      <td>77.915433</td>
+      <td>77.9154</td>
     </tr>
   </tbody>
 </table>
       </div>
     </section>
-    
 
-    
-    <section class="panel">
-      <h2>Feature Ablation Results</h2>
-      <p class="muted">Compares the full feature set with versions where feature groups are removed.</p>
+    <section class="section-card">
+      <h2>Feature ablation results</h2>
+      <p class="muted">Checks whether the full feature set beats reduced feature groups.</p>
       <div class="table-wrap">
         <table class="dataframe data-table">
   <thead>
     <tr style="text-align: right;">
-      <th>Feature set tested</th>
-      <th>Evaluated dates</th>
-      <th>Feature count</th>
-      <th>Average Rank IC</th>
-      <th>Average top-5 hit rate</th>
-      <th>Average top-5 realized return</th>
-      <th>Average selected stocks</th>
-      <th>Average after-cost return</th>
-      <th>Return volatility</th>
-      <th>Diagnostic Sharpe</th>
-      <th>Max active drawdown</th>
-      <th>Average turnover</th>
-      <th>Maximum turnover</th>
-      <th>Final cumulative after-cost active return</th>
+      <th>ablation_name</th>
+      <th>evaluated_dates</th>
+      <th>feature_count</th>
+      <th>average_rank_ic</th>
+      <th>average_top_5_hit_rate</th>
+      <th>average_after_cost_return</th>
+      <th>diagnostic_sharpe</th>
+      <th>max_active_drawdown</th>
+      <th>average_turnover</th>
+      <th>final_cumulative_after_cost_active_return</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>all_features</td>
-      <td>1,609.00</td>
+      <td>1609</td>
       <td>51</td>
-      <td>0.338033</td>
+      <td>0.3380</td>
       <td>67.61%</td>
-      <td>2.36%</td>
-      <td>5</td>
       <td>1.82%</td>
-      <td>2.17%</td>
-      <td>0.840073</td>
+      <td>0.8401</td>
       <td>-35.59%</td>
       <td>35.46%</td>
-      <td>40.00%</td>
-      <td>29.360326</td>
+      <td>29.3603</td>
     </tr>
     <tr>
       <td>without_herding</td>
-      <td>1,609.00</td>
+      <td>1609</td>
       <td>41</td>
-      <td>0.337983</td>
+      <td>0.3380</td>
       <td>67.63%</td>
-      <td>2.37%</td>
-      <td>5</td>
       <td>1.82%</td>
-      <td>2.20%</td>
-      <td>0.827557</td>
+      <td>0.8276</td>
       <td>-35.59%</td>
       <td>35.60%</td>
-      <td>40.00%</td>
-      <td>29.281588</td>
+      <td>29.2816</td>
     </tr>
     <tr>
       <td>without_price_limit</td>
-      <td>1,609.00</td>
+      <td>1609</td>
       <td>36</td>
-      <td>0.316762</td>
+      <td>0.3168</td>
       <td>66.61%</td>
-      <td>2.23%</td>
-      <td>5</td>
       <td>1.69%</td>
-      <td>2.16%</td>
-      <td>0.784717</td>
+      <td>0.7847</td>
       <td>-35.93%</td>
       <td>36.15%</td>
-      <td>40.00%</td>
-      <td>27.268516</td>
+      <td>27.2685</td>
     </tr>
     <tr>
       <td>without_risk</td>
-      <td>1,609.00</td>
+      <td>1609</td>
       <td>49</td>
-      <td>0.314453</td>
+      <td>0.3145</td>
       <td>65.73%</td>
-      <td>2.18%</td>
-      <td>5</td>
       <td>1.63%</td>
-      <td>2.18%</td>
-      <td>0.749285</td>
+      <td>0.7493</td>
       <td>-36.36%</td>
       <td>36.51%</td>
-      <td>40.00%</td>
-      <td>26.30143</td>
+      <td>26.3014</td>
     </tr>
     <tr>
       <td>without_volume_liquidity</td>
-      <td>1,609.00</td>
+      <td>1609</td>
       <td>40</td>
-      <td>0.307164</td>
+      <td>0.3072</td>
       <td>65.51%</td>
-      <td>2.15%</td>
-      <td>5</td>
       <td>1.64%</td>
-      <td>2.21%</td>
-      <td>0.742006</td>
+      <td>0.7420</td>
       <td>-32.26%</td>
       <td>36.17%</td>
-      <td>40.00%</td>
-      <td>26.341446</td>
+      <td>26.3414</td>
     </tr>
   </tbody>
 </table>
       </div>
     </section>
-    
 
-    <section class="panel">
-      <h2>Figures</h2>
-      <p class="muted">
-        These are the original research figures from reports/figures. The annotations explain how to read each graph.
-        If a graph is visually crowded, the next step is to improve the original visualization script rather than creating duplicate graphs.
+
+    <section class="interactive-card">
+      <h2>Cumulative after-cost active return</h2>
+      <p class="helper">
+        Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
+        Double-click a legend item to isolate it.
       </p>
+      <iframe src="interactive/interactive_cumulative_return.html?v=1783090268" title="Cumulative after-cost active return" loading="lazy"></iframe>
+      <div class="annotation">
+        <p><strong>What this means:</strong> Shows whether the strategy builds active value over time after estimated trading costs.</p>
+        <p><strong>How to read it:</strong> A rising line means the strategy is adding active return. Click legend items to hide, show, or isolate scenarios.</p>
+        <p><strong>What to watch:</strong> Look for steady growth, long flat periods, and sharp drops.</p>
+      </div>
     </section>
 
-    
-    <figure class="figure-card">
-      <img src="figures/cumulative_after_cost_active_return.png" alt="Cumulative After Cost Active Return">
-      <figcaption>Cumulative After Cost Active Return</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> This is the main performance path. It shows whether the strategy grows after estimated trading costs.</p>
-        <p><strong>How to read it:</strong> Focus on the overall direction and the gap between lines. If the lines rise steadily, the backtest is strong. If one line is consistently above another, that version performs better.</p>
-        <p><strong>Current limitation:</strong> If the lines are very close, the graph is saying the different execution or optimization modes produce similar outcomes. We should later adjust this figure to make the comparison easier.</p>
-      </div>
-    </figure>
-    
 
-    <figure class="figure-card">
-      <img src="figures/active_drawdown.png" alt="Active Drawdown">
-      <figcaption>Active Drawdown</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> This shows how much performance falls from a previous high point.</p>
-        <p><strong>How to read it:</strong> The closer the line stays to zero, the less painful the strategy is. Deep downward spikes show periods when the strategy gave back previous gains.</p>
-        <p><strong>Current limitation:</strong> This graph is currently dense. The most useful part is the deepest drop and whether the strategy recovers quickly.</p>
-      </div>
-    </figure>
-    
-
-    <figure class="figure-card">
-      <img src="figures/portfolio_turnover.png" alt="Portfolio Turnover">
-      <figcaption>Portfolio Turnover</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> This shows how much the portfolio changes between rebalancing dates.</p>
-        <p><strong>How to read it:</strong> Higher turnover means more buying and selling. More trading usually means more costs and lower practical realism.</p>
-        <p><strong>Current limitation:</strong> If the lines are too close, the graph is not doing enough visual work. We should later change it into a clearer summary or rescale it.</p>
-      </div>
-    </figure>
-    
-
-    <figure class="figure-card">
-      <img src="figures/rolling_diagnostic_sharpe.png" alt="Rolling Diagnostic Sharpe">
-      <figcaption>Rolling Diagnostic Sharpe</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> This shows whether the strategy stays useful across time instead of only working in one lucky period.</p>
-        <p><strong>How to read it:</strong> Higher values mean better return compared with volatility in that rolling window. Long weak stretches are more concerning than short dips.</p>
-        <p><strong>Current limitation:</strong> Rolling metrics can be noisy, so the broad trend matters more than each small movement.</p>
-      </div>
-    </figure>
-    
-
-    <figure class="figure-card">
-      <img src="figures/horizon_diagnostic_sharpe.png" alt="Horizon Diagnostic Sharpe">
-      <figcaption>Horizon Diagnostic Sharpe</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> This compares which prediction horizon gives the best risk-adjusted backtest result.</p>
-        <p><strong>How to read it:</strong> The strongest horizon is the one with the highest value. In this project, the longer horizon is currently stronger than the 1-day horizon.</p>
-        <p><strong>Current limitation:</strong> This does not mean the best horizon will always stay best in future data.</p>
-      </div>
-    </figure>
-    
-
-    <figure class="figure-card">
-      <img src="figures/horizon_rank_ic.png" alt="Horizon Rank Ic">
-      <figcaption>Horizon Rank Ic</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> This checks whether the model ranks stocks in the right order for each forecast horizon.</p>
-        <p><strong>How to read it:</strong> Higher Rank IC means the model is better at putting future winners above future losers.</p>
-        <p><strong>Current limitation:</strong> A high ranking score supports the signal, but it still needs portfolio and cost testing.</p>
-      </div>
-    </figure>
-    
-
-    <figure class="figure-card">
-      <img src="figures/ablation_diagnostic_sharpe.png" alt="Ablation Diagnostic Sharpe">
-      <figcaption>Ablation Diagnostic Sharpe</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> This checks whether removing feature groups weakens performance.</p>
-        <p><strong>How to read it:</strong> If the full feature set performs best, the removed feature groups likely contain useful information.</p>
-        <p><strong>Current limitation:</strong> Small differences should not be over-interpreted. The key question is whether the ranking changes meaningfully.</p>
-      </div>
-    </figure>
-    
-
-    <figure class="figure-card">
-      <img src="figures/top_gradient_boosting_feature_importance.png" alt="Top Gradient Boosting Feature Importance">
-      <figcaption>Top Gradient Boosting Feature Importance</figcaption>
-      <div class="figure-note">
-        <p><strong>What this means:</strong> This shows which input variables the Gradient Boosting model uses most.</p>
-        <p><strong>How to read it:</strong> Features near the top have more influence on the model&#x27;s predictions.</p>
-        <p><strong>Current limitation:</strong> Feature importance explains model usage, not guaranteed economic causality.</p>
-      </div>
-    </figure>
-    
-
-    
-    <section class="panel">
-      <h2>Metric Glossary: What The Measured Data Means</h2>
-      <p class="muted">
-        This section explains the table columns and graph concepts in plain language.
-        Read this if Rank IC, Sharpe, drawdown, turnover, or model score is unclear.
+    <section class="interactive-card">
+      <h2>Active drawdown</h2>
+      <p class="helper">
+        Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
+        Double-click a legend item to isolate it.
       </p>
+      <iframe src="interactive/interactive_active_drawdown.html?v=1783090268" title="Active drawdown" loading="lazy"></iframe>
+      <div class="annotation">
+        <p><strong>What this means:</strong> Shows how far the strategy falls below its previous active-return peak.</p>
+        <p><strong>How to read it:</strong> Values closer to zero are better. Deep negative drops mean the strategy gave back previous gains.</p>
+        <p><strong>What to watch:</strong> Use the slider to inspect the large 2026 drawdown and compare execution assumptions.</p>
+      </div>
+    </section>
+
+
+    <section class="interactive-card">
+      <h2>Portfolio turnover</h2>
+      <p class="helper">
+        Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
+        Double-click a legend item to isolate it.
+      </p>
+      <iframe src="interactive/interactive_portfolio_turnover.html?v=1783090269" title="Portfolio turnover" loading="lazy"></iframe>
+      <div class="annotation">
+        <p><strong>What this means:</strong> Shows how much the portfolio changes between rebalancing dates.</p>
+        <p><strong>How to read it:</strong> Higher turnover means more trading. More trading can make live execution less realistic because costs rise.</p>
+        <p><strong>What to watch:</strong> Look for long periods near the maximum turnover level.</p>
+      </div>
+    </section>
+
+
+    <section class="interactive-card">
+      <h2>Rolling 60-day diagnostic Sharpe</h2>
+      <p class="helper">
+        Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
+        Double-click a legend item to isolate it.
+      </p>
+      <iframe src="interactive/interactive_rolling_diagnostic_sharpe.html?v=1783090269" title="Rolling 60-day diagnostic Sharpe" loading="lazy"></iframe>
+      <div class="annotation">
+        <p><strong>What this means:</strong> Shows short-term risk-adjusted performance over rolling 60-trading-day windows.</p>
+        <p><strong>How to read it:</strong> Higher values mean better return per unit of volatility during the recent window.</p>
+        <p><strong>What to watch:</strong> Look for unstable periods where the rolling Sharpe drops sharply.</p>
+      </div>
+    </section>
+
+
+
+    <section class="section-card">
+      <h2>Additional static diagnostics</h2>
+      <div class="static-grid">
+
+      <article class="static-card">
+        <h3>Top gradient boosting feature importance</h3>
+        <img src="figures/top_gradient_boosting_feature_importance.png" alt="Top gradient boosting feature importance">
+        <div class="small-note">
+          <p><strong>Meaning:</strong> Shows which inputs the gradient boosting model relied on most.</p>
+          <p><strong>Read:</strong> Larger bars mean higher model importance.</p>
+        </div>
+      </article>
+
+
+      <article class="static-card">
+        <h3>Horizon diagnostic Sharpe</h3>
+        <img src="figures/horizon_diagnostic_sharpe.png" alt="Horizon diagnostic Sharpe">
+        <div class="small-note">
+          <p><strong>Meaning:</strong> Compares risk-adjusted behavior across prediction horizons.</p>
+          <p><strong>Read:</strong> Higher is better for this diagnostic metric.</p>
+        </div>
+      </article>
+
+
+      <article class="static-card">
+        <h3>Horizon Rank IC</h3>
+        <img src="figures/horizon_rank_ic.png" alt="Horizon Rank IC">
+        <div class="small-note">
+          <p><strong>Meaning:</strong> Compares how well the model ranks stocks across forecast horizons.</p>
+          <p><strong>Read:</strong> Higher means the ranking aligns better with realized future relative returns.</p>
+        </div>
+      </article>
+
+
+      <article class="static-card">
+        <h3>Ablation diagnostic Sharpe</h3>
+        <img src="figures/ablation_diagnostic_sharpe.png" alt="Ablation diagnostic Sharpe">
+        <div class="small-note">
+          <p><strong>Meaning:</strong> Shows what happens when feature groups are removed.</p>
+          <p><strong>Read:</strong> If performance falls after removing a group, that group likely adds useful information.</p>
+        </div>
+      </article>
+
+      </div>
+    </section>
+
+
+
+    <section class="section-card">
+      <h2>Glossary: what the metrics mean</h2>
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Metric / concept</th>
-              <th>Meaning</th>
-              <th>How to interpret it</th>
+              <th>Term</th>
+              <th>Simple meaning</th>
             </tr>
           </thead>
           <tbody>
-            
-        <tr>
-          <td>Rank</td>
-          <td>The position of a stock in the latest model ranking. Rank 1 means the model gives that stock the strongest score on the latest signal date.</td>
-          <td>Lower rank number is better.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Ticker</td>
-          <td>The stock code, such as FPT, VCB, VIC, or HPG.</td>
-          <td>Used to identify each VN30 stock.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Signal date</td>
-          <td>The date when the model ranking or portfolio signal was generated from the processed dataset.</td>
-          <td>This is not automatically today&#x27;s live trading date.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Model score / predicted return</td>
-          <td>The model&#x27;s estimated relative-return signal for a stock. It is best understood as a score for ranking stocks, not as a guaranteed future return.</td>
-          <td>Higher is better.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Realized forward return</td>
-          <td>The return that actually happened after the signal date over the target horizon. This is used to evaluate the model after the fact.</td>
-          <td>This is not known when the model makes the prediction.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Portfolio weight</td>
-          <td>The percentage of the research portfolio allocated to a stock. For example, 20% means one-fifth of the portfolio goes into that stock.</td>
-          <td>Higher means the optimizer selected more of that stock.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Issuer group</td>
-          <td>A grouping used to identify related companies, such as Vingroup names. This helps detect concentration risk.</td>
-          <td>Useful for checking whether the portfolio is too concentrated.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Optimization mode</td>
-          <td>The portfolio construction rule used after model ranking. For example, herding-aware mode tries to account for crowding or related-stock behavior.</td>
-          <td>Different modes test different portfolio assumptions.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Forecast horizon</td>
-          <td>How far ahead the model tries to predict. In this project, the tested horizons are 1 day, 5 days, and 10 days.</td>
-          <td>The best horizon is the one with stronger ranking and backtest evidence.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Target label</td>
-          <td>The exact future-return variable the model is trained to predict, such as forward_relative_return_5d or forward_relative_return_10d.</td>
-          <td>It defines the prediction task.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Evaluated dates</td>
-          <td>The number of dates included in the backtest or evaluation.</td>
-          <td>More evaluated dates usually means more evidence.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Feature count</td>
-          <td>The number of input variables used by the model.</td>
-          <td>More features is not always better; ablation tests check whether features add value.</td>
-        </tr>
-        
 
         <tr>
           <td>Rank IC</td>
-          <td>Rank Information Coefficient. It measures whether the model ranked future winners above future losers. It focuses on ordering, not exact return prediction.</td>
-          <td>Higher is better. Near zero means weak ranking ability. Negative means the ranking may be wrong-way.</td>
+          <td>Correlation between the model&#x27;s stock ranking and realized future return ranking.</td>
         </tr>
-        
 
-        <tr>
-          <td>Average Rank IC</td>
-          <td>The average Rank IC across all evaluated dates.</td>
-          <td>Higher means the ranking signal was more consistently useful.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Top-5 hit rate</td>
-          <td>How often the model&#x27;s top-ranked stocks ended up being among the stronger realized performers.</td>
-          <td>Higher is better.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Average top-5 realized return</td>
-          <td>The average future return of the stocks selected near the top of the ranking.</td>
-          <td>Higher means the model&#x27;s preferred stocks performed better afterward.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Average selected stocks</td>
-          <td>The average number of stocks selected into the portfolio.</td>
-          <td>This shows how concentrated or diversified the strategy is.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Average after-cost return</td>
-          <td>The average return after estimated commission, slippage, and liquidity costs.</td>
-          <td>Higher is better. This matters more than before-cost return.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Return volatility</td>
-          <td>How much the strategy&#x27;s returns fluctuate. Higher volatility means returns are less stable.</td>
-          <td>Lower is usually more comfortable, but it must be compared with return.</td>
-        </tr>
-        
 
         <tr>
           <td>Diagnostic Sharpe</td>
-          <td>A simple risk-adjusted performance measure. It compares average return with return volatility.</td>
-          <td>Higher is better. Negative means poor risk-adjusted performance.</td>
+          <td>Return divided by volatility, annualized. Used here as a diagnostic comparison metric.</td>
         </tr>
-        
 
-        <tr>
-          <td>Max active drawdown</td>
-          <td>The worst fall from a previous peak in the active-return path.</td>
-          <td>Closer to zero is better. Large negative values mean painful losing periods.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Average turnover</td>
-          <td>The average amount of portfolio change between rebalancing dates.</td>
-          <td>Lower is easier to trade. Very high turnover creates more trading costs.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Maximum turnover</td>
-          <td>The largest single-period portfolio change in the backtest.</td>
-          <td>High maximum turnover can signal unrealistic trading pressure.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Final cumulative after-cost active return</td>
-          <td>The final compounded value of the strategy&#x27;s active return after estimated trading costs.</td>
-          <td>Higher is better, but it must be judged together with drawdown and turnover.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Feature ablation</td>
-          <td>A test where one group of features is removed to see whether model performance gets worse.</td>
-          <td>If removing a feature group hurts performance, that group likely adds useful information.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Full feature set</td>
-          <td>The model version that uses all available feature groups.</td>
-          <td>It should ideally outperform reduced versions.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Without herding</td>
-          <td>A feature-ablation version where herding-related features are removed.</td>
-          <td>If performance falls, herding features are useful.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Without price limit</td>
-          <td>A feature-ablation version where Vietnam price-limit features are removed.</td>
-          <td>If performance falls, price-limit features are useful.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Without risk</td>
-          <td>A feature-ablation version where risk-related features are removed.</td>
-          <td>If performance falls, risk features are useful.</td>
-        </tr>
-        
-
-        <tr>
-          <td>Without volume/liquidity</td>
-          <td>A feature-ablation version where volume and liquidity features are removed.</td>
-          <td>If performance falls, liquidity features are useful.</td>
-        </tr>
-        
 
         <tr>
           <td>Active return</td>
-          <td>The strategy&#x27;s return compared with the benchmark or active-return baseline used in the project.</td>
-          <td>Positive active return means the strategy beats the baseline.</td>
+          <td>Return relative to the reference portfolio or benchmark.</td>
         </tr>
-        
+
 
         <tr>
-          <td>After-cost active return</td>
-          <td>Active return after estimated trading costs.</td>
-          <td>This is more realistic than before-cost active return.</td>
+          <td>After-cost return</td>
+          <td>Return after estimated commission, slippage, and liquidity penalties.</td>
         </tr>
-        
+
 
         <tr>
           <td>Drawdown</td>
-          <td>The fall from a previous high point.</td>
-          <td>Large drawdowns mean the strategy can lose a lot before recovering.</td>
+          <td>Fall from a previous performance peak.</td>
         </tr>
-        
+
 
         <tr>
           <td>Turnover</td>
-          <td>How much the portfolio changes from one rebalance to the next.</td>
-          <td>More turnover usually means more trading cost and lower live-trading realism.</td>
+          <td>How much the portfolio changes between rebalancing dates.</td>
         </tr>
-        
+
+
+        <tr>
+          <td>Feature ablation</td>
+          <td>Removing feature groups to test whether they help.</td>
+        </tr>
+
+
+        <tr>
+          <td>Forecast horizon</td>
+          <td>How far ahead the model predicts, such as 1 day, 5 days, or 10 days.</td>
+        </tr>
+
+
+        <tr>
+          <td>Top-5 hit rate</td>
+          <td>How often top-ranked stocks are among better realized performers.</td>
+        </tr>
+
+
+        <tr>
+          <td>Model score</td>
+          <td>The model&#x27;s predicted relative return signal.</td>
+        </tr>
+
           </tbody>
         </table>
       </div>
     </section>
-    
 
-    <section class="panel">
-      <h2>What The Dashboard Means</h2>
-      <p>
-        The dashboard means that the project can generate a latest processed VN30 stock ranking,
-        convert that ranking into a constrained long-only research portfolio, and evaluate whether the signal was historically useful.
-      </p>
-      <p>
-        It does not mean the system is trade-ready. The current output is a research signal, not a broker-ready order list,
-        not a guaranteed return forecast, and not personalized investment advice.
-      </p>
+
+    <section class="disclaimer">
+      <strong>Research disclaimer:</strong>
+      This dashboard summarizes a historical research backtest. It is not trade-ready and does not account for
+      all live execution constraints, data-vendor issues, point-in-time VN30 membership, tax, borrow constraints,
+      or real-time market impact.
     </section>
-
-    <section class="panel">
-      <h2>Report Links</h2>
-      <p class="muted">Open the source reports for methodology, audit notes, and detailed results.</p>
-      <div class="links">
-        <a class="report-link available" href="../README.md">README</a>
-<a class="report-link available" href="../PROJECT_CONTEXT.md">Project Context</a>
-<a class="report-link available" href="report_index.md">Report Index</a>
-<a class="report-link available" href="final_results.md">Final Results</a>
-<a class="report-link available" href="methodology.md">Methodology</a>
-<a class="report-link available" href="final_audit.md">Final Audit</a>
-<a class="report-link available" href="model_report.md">Model Report</a>
-<a class="report-link available" href="data_quality_report.md">Data Quality Report</a>
-      </div>
-    </section>
-
-    <footer>
-      Generated locally from repository artifacts. Raw and processed data are intentionally kept out of Git.
-    </footer>
   </main>
 </body>
 </html>
