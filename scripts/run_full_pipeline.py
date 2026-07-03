@@ -121,6 +121,16 @@ def parse_args() -> argparse.Namespace:
         choices=[step.name for step in PIPELINE_STEPS],
         help="Stop after a specific pipeline step.",
     )
+    parser.add_argument(
+        "--clean-first",
+        action="store_true",
+        help="Run the generated-output cleaner before the pipeline.",
+    )
+    parser.add_argument(
+        "--summary-only",
+        action="store_true",
+        help="Run only the report summary step.",
+    )
     return parser.parse_args()
 
 
@@ -165,9 +175,45 @@ def run_step(step_number: int, total_steps: int, step: PipelineStep) -> None:
     print(f"Finished: {step.name} ({elapsed:.1f} seconds)")
 
 
+def run_cleaner(dry_run: bool) -> None:
+    cleaner_path = ROOT / "scripts" / "clean_generated_outputs.py"
+
+    if not cleaner_path.exists():
+        raise FileNotFoundError(f"Missing cleaner script: {cleaner_path}")
+
+    command = [sys.executable, str(cleaner_path)]
+
+    if not dry_run:
+        command.append("--confirm")
+
+    print()
+    print("=" * 80)
+    print("Generated output cleaner")
+    print("=" * 80)
+
+    completed = subprocess.run(
+        command,
+        cwd=ROOT,
+        check=False,
+    )
+
+    if completed.returncode != 0:
+        raise RuntimeError(
+            f"Generated output cleaner failed. Exit code: {completed.returncode}"
+        )
+
+
 def main() -> None:
     args = parse_args()
     steps = selected_steps(args.start_at, args.stop_after)
+    if args.summary_only and (args.start_at is not None or args.stop_after is not None):
+        raise SystemExit("--summary-only cannot be combined with --start-at or --stop-after.")
+
+    if args.summary_only and args.clean_first and not args.dry_run:
+        raise SystemExit("--clean-first --summary-only is unsafe without --dry-run.")
+
+    if args.summary_only:
+        steps = [step for step in PIPELINE_STEPS if step.name == "report_summary"]
 
     print()
     print("VN30 LONG-ONLY ML PIPELINE")
@@ -176,8 +222,12 @@ def main() -> None:
     print(f"Python executable: {sys.executable}")
     print()
     print("This runner refreshes local outputs using existing raw data.")
-    print("It does not download new data and does not delete generated files.")
+    print("It does not download new data.")
+    print("It deletes generated parquet outputs only when --clean-first is used.")
     print()
+
+    if args.clean_first:
+        run_cleaner(dry_run=args.dry_run)
 
     if args.dry_run:
         print("DRY RUN ONLY. No commands will be executed.")
