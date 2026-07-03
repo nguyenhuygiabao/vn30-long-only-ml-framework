@@ -177,28 +177,36 @@ Generated data files are intentionally ignored by Git:
 ```text
 data/processed/
 data/raw/vnstock/
+data/raw/yahoo/
 ```
 
 These files are local reproducible outputs and should not be committed unless they are final report tables or figures.
 
-## Planned upgrades
+## Project status and next upgrades
 
-Near-term:
+Completed usability upgrades:
 
-- Add `reports/report_index.md`
-- Add a one-command pipeline runner
+- Updated the GitHub README as the project front page
+- Added reports/report_index.md to link reports, tables, and figures
+- Added scripts/report_summary.py for a quick command-line project summary
+- Added .gitignore rules so generated raw and processed data stay local
+
+Priority next upgrades:
+
+- Add one prompt/context file that contains the full project state
+- Add a reliable one-command pipeline runner
 - Add stale-output handling for old generated predictions
-- Add command-line report summary
+- Add a clean audit/update workflow after each rerun
+- Add optional daily auto-update later through Windows Task Scheduler or GitHub Actions
 
-Medium-term:
+Medium-term upgrades:
 
 - Add Streamlit dashboard
-- Add Windows Task Scheduler refresh
 - Add stronger out-of-sample robustness tests
 - Add non-overlapping portfolio evaluation
 - Improve execution realism
 
-Long-term:
+Long-term research upgrades:
 
 - Add point-in-time VN30 membership
 - Add fundamental data
