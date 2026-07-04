@@ -448,13 +448,18 @@ def page_html() -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {{
-      --bg: #0f172a;
-      --panel: #111827;
-      --panel-soft: #1f2937;
-      --line: #334155;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #7dd3fc;
+      --bg: #050814;
+      --bg-2: #070d1c;
+      --panel: rgba(11, 18, 32, 0.96);
+      --panel-soft: rgba(17, 27, 46, 0.96);
+      --panel-glow: rgba(34, 211, 238, 0.12);
+      --line: rgba(148, 163, 184, 0.22);
+      --line-strong: rgba(125, 211, 252, 0.38);
+      --text: #eaf2ff;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --accent-2: #34d399;
+      --danger: #fb7185;
       --white: #ffffff;
     }}
 
@@ -464,49 +469,90 @@ def page_html() -> str:
 
     body {{
       margin: 0;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top left, rgba(34, 211, 238, 0.13), transparent 32rem),
+        radial-gradient(circle at top right, rgba(52, 211, 153, 0.10), transparent 26rem),
+        linear-gradient(180deg, var(--bg), #030712 55%, #020617);
       color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Arial, Helvetica, sans-serif;
       line-height: 1.5;
     }}
 
     header {{
-      padding: 42px 46px 34px;
-      border-bottom: 1px solid var(--line);
+      width: min(1500px, calc(100% - 64px));
+      margin: 24px auto 20px;
+      padding: 28px 30px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(8, 13, 28, 0.98)),
+        radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.18), transparent 22rem);
+      box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      position: relative;
+      overflow: hidden;
+    }}
+
+    header::after {{
+      content: "RESEARCH LOCALHOST";
+      position: absolute;
+      top: 26px;
+      right: 28px;
+      padding: 7px 12px;
+      border: 1px solid rgba(52, 211, 153, 0.32);
+      border-radius: 999px;
+      color: #86efac;
+      background: rgba(22, 163, 74, 0.10);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      box-shadow: 0 0 22px rgba(34, 197, 94, 0.16);
     }}
 
     h1 {{
-      margin: 0 0 12px;
-      font-size: 42px;
-      line-height: 1.1;
+      margin: 0 0 10px;
+      font-size: clamp(34px, 4vw, 54px);
+      line-height: 1.03;
+      letter-spacing: -0.055em;
+      background: linear-gradient(90deg, #e0f2fe, #38bdf8 42%, #34d399);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }}
 
     h2 {{
       margin: 0 0 16px;
-      font-size: 26px;
+      font-size: 25px;
+      letter-spacing: -0.02em;
     }}
 
     h3 {{
       margin: 0 0 12px;
-      font-size: 18px;
+      font-size: 17px;
+      letter-spacing: -0.01em;
+    }}
+
+    p {{
+      margin: 0;
     }}
 
     .subtitle {{
-      max-width: 1100px;
+      max-width: 980px;
       color: var(--muted);
-      font-size: 18px;
+      font-size: 17px;
     }}
 
     main {{
       width: min(1500px, calc(100% - 64px));
-      margin: 34px auto 60px;
+      margin: 0 auto 60px;
     }}
 
     .metric-grid {{
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 18px;
-      margin-bottom: 26px;
+      gap: 16px;
+      margin-bottom: 22px;
     }}
 
     .metric-card,
@@ -514,29 +560,46 @@ def page_html() -> str:
     .interactive-card {{
       border: 1px solid var(--line);
       border-radius: 18px;
-      background: var(--panel);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
-      margin-bottom: 26px;
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(8, 13, 28, 0.96));
+      box-shadow:
+        0 18px 46px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+      margin-bottom: 22px;
     }}
 
     .metric-card {{
-      padding: 24px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }}
+
+    .metric-card::before {{
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      opacity: 0.9;
     }}
 
     .metric-title {{
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 14px;
+      letter-spacing: 0.09em;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 12px;
     }}
 
     .metric-value {{
-      color: var(--accent);
-      font-size: 34px;
-      font-weight: 800;
-      margin-bottom: 8px;
+      color: var(--text);
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 7px;
+      letter-spacing: -0.04em;
     }}
 
     .metric-subtext,
@@ -550,8 +613,18 @@ def page_html() -> str:
       padding: 24px;
     }}
 
+    .section-card > .muted,
+    .interactive-card > .helper {{
+      margin-top: -6px;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }}
+
     .table-wrap {{
       overflow-x: auto;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 14px;
+      background: rgba(2, 6, 23, 0.34);
     }}
 
     .data-table {{
@@ -561,36 +634,51 @@ def page_html() -> str:
     }}
 
     .data-table th {{
-      background: var(--panel-soft);
-      color: var(--text);
+      background: rgba(15, 23, 42, 0.92);
+      color: #dbeafe;
       text-align: left;
-      padding: 11px 12px;
+      padding: 12px 13px;
       white-space: nowrap;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.055em;
+      border-bottom: 1px solid var(--line);
     }}
 
     .data-table td {{
-      border-top: 1px solid var(--line);
-      padding: 10px 12px;
-      color: var(--text);
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+      padding: 11px 13px;
+      color: #d7e3f8;
       white-space: nowrap;
+    }}
+
+    .data-table tr:hover td {{
+      background: rgba(34, 211, 238, 0.055);
+    }}
+
+    .interactive-card {{
+      background:
+        linear-gradient(180deg, rgba(9, 14, 27, 0.98), rgba(3, 7, 18, 0.98));
+      border-color: rgba(125, 211, 252, 0.20);
     }}
 
     .interactive-card iframe {{
       display: block;
       width: 100%;
-      height: 610px;
-      border: 0;
-      border-radius: 14px;
-      background: var(--white);
+      height: 620px;
+      border: 1px solid rgba(125, 211, 252, 0.18);
+      border-radius: 16px;
+      background: #050a14;
       margin: 14px 0 0;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
     }}
 
     .annotation {{
       margin-top: 16px;
-      padding: 18px;
-      border: 1px solid var(--line);
+      padding: 16px 18px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
       border-radius: 14px;
-      background: var(--panel-soft);
+      background: rgba(15, 23, 42, 0.74);
       color: var(--muted);
     }}
 
@@ -599,7 +687,7 @@ def page_html() -> str:
     }}
 
     .annotation p + p {{
-      margin-top: 10px;
+      margin-top: 8px;
     }}
 
     .annotation strong,
@@ -610,13 +698,13 @@ def page_html() -> str:
     .static-grid {{
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
+      gap: 16px;
     }}
 
     .static-card {{
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: var(--panel-soft);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 15px;
+      background: rgba(8, 13, 28, 0.92);
       padding: 16px;
       min-width: 0;
     }}
@@ -626,9 +714,11 @@ def page_html() -> str:
       width: 100%;
       height: 300px;
       object-fit: contain;
-      background: var(--white);
-      border-radius: 10px;
+      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 12px;
       margin-bottom: 12px;
+      filter: none;
     }}
 
     .small-note {{
@@ -641,19 +731,38 @@ def page_html() -> str:
     }}
 
     .small-note p + p {{
-      margin-top: 8px;
+      margin-top: 7px;
     }}
 
     .disclaimer {{
       margin-top: 24px;
-      padding: 18px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: var(--panel-soft);
-      color: var(--muted);
+      padding: 18px 20px;
+      border: 1px solid rgba(251, 113, 133, 0.28);
+      border-radius: 16px;
+      background: rgba(127, 29, 29, 0.16);
+      color: #fecdd3;
+    }}
+
+    .disclaimer strong {{
+      color: #ffe4e6;
     }}
 
     @media (max-width: 1100px) {{
+      header,
+      main {{
+        width: min(100% - 28px, 1500px);
+      }}
+
+      header {{
+        padding: 28px 22px;
+      }}
+
+      header::after {{
+        position: static;
+        display: inline-block;
+        margin-top: 16px;
+      }}
+
       .metric-grid {{
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }}
@@ -661,23 +770,11 @@ def page_html() -> str:
       .static-grid {{
         grid-template-columns: 1fr;
       }}
-
-      main {{
-        width: min(100% - 28px, 1500px);
-      }}
-
-      header {{
-        padding: 30px 24px;
-      }}
     }}
 
     @media (max-width: 700px) {{
       .metric-grid {{
         grid-template-columns: 1fr;
-      }}
-
-      h1 {{
-        font-size: 32px;
       }}
 
       .interactive-card iframe {{

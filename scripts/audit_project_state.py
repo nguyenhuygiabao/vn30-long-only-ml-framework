@@ -28,6 +28,7 @@ KEY_FILES = [
     ROOT / "scripts" / "audit_project_state.py",
     ROOT / "scripts" / "build_html_report.py",
     ROOT / "scripts" / "build_interactive_charts.py",
+    ROOT / "scripts" / "darken_static_figures.py",
 ]
 
 GENERATED_PATH_PREFIXES = [

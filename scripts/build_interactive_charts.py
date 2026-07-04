@@ -29,10 +29,10 @@ SCENARIO_LABELS = {
 }
 
 SCENARIO_COLORS = {
-    ("herding_aware", "normal"): "#0072B2",
-    ("herding_aware", "price_limit_aware"): "#E69F00",
-    ("normal", "normal"): "#009E73",
-    ("normal", "price_limit_aware"): "#CC79A7",
+    ("herding_aware", "normal"): "#60a5fa",
+    ("herding_aware", "price_limit_aware"): "#fbbf24",
+    ("normal", "normal"): "#34d399",
+    ("normal", "price_limit_aware"): "#f472b6",
 }
 
 
@@ -43,7 +43,7 @@ def read_backtest_returns() -> pd.DataFrame:
     data = pd.read_parquet(BACKTEST_RETURNS_PATH)
     data["date"] = pd.to_datetime(data["date"])
 
-    return data
+    return data.sort_values("date")
 
 
 def scenario_group(
@@ -60,45 +60,6 @@ def scenario_group(
     return group.sort_values("date")
 
 
-def date_menu(data: pd.DataFrame) -> dict:
-    min_date = data["date"].min()
-    end_date = data["date"].max()
-
-    def window(
-        months: int | None = None,
-        years: int | None = None,
-    ) -> list[str]:
-        if months is not None:
-            start_date = end_date - pd.DateOffset(months=months)
-        elif years is not None:
-            start_date = end_date - pd.DateOffset(years=years)
-        else:
-            start_date = min_date
-
-        return [
-            start_date.strftime("%Y-%m-%d"),
-            end_date.strftime("%Y-%m-%d"),
-        ]
-
-    return {
-        "type": "buttons",
-        "direction": "right",
-        "showactive": True,
-        "x": 1.015,
-        "xanchor": "left",
-        "y": 0.83,
-        "yanchor": "top",
-        "pad": {"r": 0, "t": 0},
-        "buttons": [
-            {"label": "3m", "method": "relayout", "args": [{"xaxis.range": window(months=3)}]},
-            {"label": "6m", "method": "relayout", "args": [{"xaxis.range": window(months=6)}]},
-            {"label": "1y", "method": "relayout", "args": [{"xaxis.range": window(years=1)}]},
-            {"label": "2y", "method": "relayout", "args": [{"xaxis.range": window(years=2)}]},
-            {"label": "All", "method": "relayout", "args": [{"xaxis.range": window()}]},
-        ],
-    }
-
-
 def base_layout(
     title: str,
     yaxis_title: str,
@@ -109,30 +70,124 @@ def base_layout(
     start_date = end_date - pd.DateOffset(years=2)
 
     return {
-        "title": {"text": title, "x": 0.02, "xanchor": "left"},
-        "template": "plotly_white",
+        "title": {
+            "text": title,
+            "x": 0.02,
+            "xanchor": "left",
+            "font": {
+                "color": "#eaf2ff",
+                "size": 22,
+            },
+        },
+        "template": "plotly_dark",
+        "paper_bgcolor": "#050a14",
+        "plot_bgcolor": "#050a14",
+        "font": {
+            "color": "#e5f2ff",
+            "family": "Arial, Helvetica, sans-serif",
+        },
         "hovermode": "x unified",
-        "height": 560,
-        "margin": {"l": 78, "r": 380, "t": 58, "b": 26},
+        "hoverlabel": {
+            "bgcolor": "#0b1220",
+            "bordercolor": "rgba(125, 211, 252, 0.45)",
+            "font": {"color": "#e5f2ff"},
+        },
+        "height": 570,
+        "margin": {
+            "l": 78,
+            "r": 380,
+            "t": 58,
+            "b": 32,
+        },
         "legend": {
             "orientation": "v",
             "yanchor": "top",
             "y": 0.70,
             "xanchor": "left",
             "x": 1.015,
+            "font": {
+                "color": "#e5f2ff",
+                "size": 12,
+            },
+            "bgcolor": "rgba(5, 10, 20, 0)",
             "itemclick": "toggle",
             "itemdoubleclick": "toggleothers",
         },
-        "updatemenus": [date_menu(data)],
         "xaxis": {
-            "title": "Date",
+            "title": {
+                "text": "Date",
+                "font": {"color": "#e5f2ff"},
+            },
             "range": [start_date, end_date],
-            "rangeslider": {"visible": True, "thickness": 0.045},
+            "showgrid": True,
+            "gridcolor": "rgba(255, 255, 255, 0.12)",
+            "zeroline": True,
+            "zerolinecolor": "rgba(255, 255, 255, 0.22)",
+            "linecolor": "rgba(255, 255, 255, 0.30)",
+            "tickfont": {"color": "#d8e6ff"},
+            "rangeselector": {
+                "x": 1.02,
+                "xanchor": "left",
+                "y": 1.12,
+                "yanchor": "top",
+                "bgcolor": "#0b1220",
+                "activecolor": "#1e40af",
+                "bordercolor": "rgba(125, 211, 252, 0.35)",
+                "font": {
+                    "color": "#f8fafc",
+                    "size": 12,
+                },
+                "buttons": [
+                    {
+                        "count": 3,
+                        "label": "3m",
+                        "step": "month",
+                        "stepmode": "backward",
+                    },
+                    {
+                        "count": 6,
+                        "label": "6m",
+                        "step": "month",
+                        "stepmode": "backward",
+                    },
+                    {
+                        "count": 1,
+                        "label": "1y",
+                        "step": "year",
+                        "stepmode": "backward",
+                    },
+                    {
+                        "count": 2,
+                        "label": "2y",
+                        "step": "year",
+                        "stepmode": "backward",
+                    },
+                    {
+                        "step": "all",
+                        "label": "All",
+                    },
+                ],
+            },
+            "rangeslider": {
+                "visible": True,
+                "thickness": 0.045,
+                "bgcolor": "#0b1220",
+                "bordercolor": "rgba(255, 255, 255, 0.18)",
+                "borderwidth": 1,
+            },
         },
         "yaxis": {
-            "title": yaxis_title,
+            "title": {
+                "text": yaxis_title,
+                "font": {"color": "#e5f2ff"},
+            },
             "tickformat": tickformat,
+            "showgrid": True,
+            "gridcolor": "rgba(255, 255, 255, 0.14)",
             "zeroline": True,
+            "zerolinecolor": "rgba(255, 255, 255, 0.28)",
+            "linecolor": "rgba(255, 255, 255, 0.30)",
+            "tickfont": {"color": "#d8e6ff"},
         },
     }
 
@@ -156,7 +211,7 @@ def add_trace(
             name=label,
             line={
                 "color": SCENARIO_COLORS[scenario_key],
-                "width": 1.5,
+                "width": 1.7,
             },
             hovertemplate=(
                 "%{x|%Y-%m-%d}<br>"
@@ -168,13 +223,85 @@ def add_trace(
     )
 
 
+def range_button_style_override() -> str:
+    return """
+<style>
+  .rangeselector .button rect {
+    fill: #0b1220 !important;
+    stroke: rgba(125, 211, 252, 0.45) !important;
+  }
+
+  .rangeselector .button text {
+    fill: #f8fafc !important;
+    font-weight: 700 !important;
+  }
+
+  .rangeselector .button.active rect {
+    fill: #1e40af !important;
+    stroke: #60a5fa !important;
+  }
+
+  .rangeselector .button.active text {
+    fill: #ffffff !important;
+    font-weight: 900 !important;
+  }
+</style>
+
+<script>
+  function applyRangeSelectorStyle() {
+    const buttons = document.querySelectorAll(".rangeselector .button");
+
+    buttons.forEach((button) => {
+      const rect = button.querySelector("rect");
+      const text = button.querySelector("text");
+      const isActive = button.classList.contains("active");
+
+      if (rect) {
+        rect.style.fill = isActive ? "#1e40af" : "#0b1220";
+        rect.style.stroke = isActive ? "#60a5fa" : "rgba(125, 211, 252, 0.45)";
+      }
+
+      if (text) {
+        text.style.fill = "#ffffff";
+        text.style.fontWeight = isActive ? "900" : "700";
+      }
+    });
+  }
+
+  window.addEventListener("load", () => {
+    applyRangeSelectorStyle();
+
+    const observer = new MutationObserver(() => {
+      applyRangeSelectorStyle();
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+
+    document.body.addEventListener("click", () => {
+      setTimeout(applyRangeSelectorStyle, 30);
+      setTimeout(applyRangeSelectorStyle, 120);
+    });
+  });
+</script>
+"""
+
+
 def write_chart(fig: go.Figure, output_path: Path) -> Path:
-    fig.write_html(
-        output_path,
+    html = fig.to_html(
         include_plotlyjs="cdn",
         full_html=True,
-        config={"displayModeBar": False, "responsive": True},
+        config={
+            "displayModeBar": False,
+            "responsive": True,
+        },
     )
+
+    html = html.replace("</head>", range_button_style_override() + "\n</head>")
+    output_path.write_text(html, encoding="utf-8", newline="\n")
 
     return output_path
 
@@ -194,6 +321,7 @@ def build_cumulative_return(data: pd.DataFrame) -> Path:
             group["cumulative_after_cost_active_return"],
             scenario_key,
             "Cumulative return",
+            hover_percent=False,
         )
 
     fig.update_layout(
@@ -286,6 +414,7 @@ def build_turnover(data: pd.DataFrame) -> Path:
 
 def build_rolling_sharpe(data: pd.DataFrame) -> Path:
     fig = go.Figure()
+
     rolling_window = 60
     annualization = 252 ** 0.5
 
@@ -310,6 +439,7 @@ def build_rolling_sharpe(data: pd.DataFrame) -> Path:
             group["rolling_sharpe"],
             scenario_key,
             "Rolling 60-day Sharpe",
+            hover_percent=False,
         )
 
     fig.update_layout(
