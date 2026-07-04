@@ -102,6 +102,73 @@ PIPELINE_STEPS = [
 ]
 
 
+
+EXPENSIVE_ML_STEP_OUTPUTS = {
+    "linear_models": [
+        ROOT / "data" / "processed" / "linear_model_predictions.parquet",
+    ],
+    "tree_models": [
+        ROOT / "data" / "processed" / "tree_model_predictions.parquet",
+        ROOT / "data" / "processed" / "tree_feature_importance.parquet",
+    ],
+    "classification_models": [
+        ROOT / "data" / "processed" / "classification_model_predictions.parquet",
+    ],
+    "ablation_tests": [
+        ROOT / "data" / "processed" / "ablation_tree_predictions.parquet",
+        ROOT / "reports" / "tables" / "ablation_results.csv",
+    ],
+    "horizon_tests": [
+        ROOT / "data" / "processed" / "horizon_tree_predictions.parquet",
+        ROOT / "reports" / "tables" / "horizon_results.csv",
+    ],
+}
+
+
+ML_STEP_DEPENDENCIES = {
+    "linear_models": [
+        ROOT / "data" / "processed" / "features_combined.parquet",
+        ROOT / "data" / "processed" / "labels.parquet",
+        ROOT / "src" / "modeling_utils.py",
+        ROOT / "src" / "linear_models.py",
+        ROOT / "src" / "walk_forward_split.py",
+        ROOT / "src" / "metrics.py",
+    ],
+    "tree_models": [
+        ROOT / "data" / "processed" / "features_combined.parquet",
+        ROOT / "data" / "processed" / "labels.parquet",
+        ROOT / "src" / "modeling_utils.py",
+        ROOT / "src" / "tree_models.py",
+        ROOT / "src" / "walk_forward_split.py",
+        ROOT / "src" / "metrics.py",
+    ],
+    "classification_models": [
+        ROOT / "data" / "processed" / "features_combined.parquet",
+        ROOT / "data" / "processed" / "labels.parquet",
+        ROOT / "src" / "modeling_utils.py",
+        ROOT / "src" / "classification_models.py",
+        ROOT / "src" / "walk_forward_split.py",
+    ],
+    "ablation_tests": [
+        ROOT / "data" / "processed" / "features_combined.parquet",
+        ROOT / "data" / "processed" / "labels.parquet",
+        ROOT / "src" / "modeling_utils.py",
+        ROOT / "src" / "ablation_tests.py",
+        ROOT / "src" / "tree_models.py",
+        ROOT / "src" / "backtester.py",
+        ROOT / "src" / "optimizer.py",
+    ],
+    "horizon_tests": [
+        ROOT / "data" / "processed" / "features_combined.parquet",
+        ROOT / "data" / "processed" / "labels.parquet",
+        ROOT / "src" / "modeling_utils.py",
+        ROOT / "src" / "horizon_tests.py",
+        ROOT / "src" / "tree_models.py",
+        ROOT / "src" / "backtester.py",
+        ROOT / "src" / "optimizer.py",
+    ],
+}
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run the VN30 long-only ML framework pipeline.",
@@ -125,6 +192,16 @@ def parse_args() -> argparse.Namespace:
         "--clean-first",
         action="store_true",
         help="Run the generated-output cleaner before the pipeline.",
+    )
+    parser.add_argument(
+        "--keep-expensive-ml",
+        action="store_true",
+        help="When used with --clean-first, preserve expensive model prediction/cache parquet files.",
+    )
+    parser.add_argument(
+        "--reuse-existing-ml",
+        action="store_true",
+        help="Skip expensive ML steps only when their output files exist and are newer than dependency files.",
     )
     parser.add_argument(
         "--summary-only",
@@ -151,6 +228,51 @@ def selected_steps(start_at: str | None, stop_after: str | None) -> list[Pipelin
         steps = steps[: stop_index + 1]
 
     return steps
+
+
+
+def should_reuse_existing_ml_step(step: PipelineStep) -> bool:
+    expected_outputs = EXPENSIVE_ML_STEP_OUTPUTS.get(step.name)
+
+    if expected_outputs is None:
+        return False
+
+    dependencies = ML_STEP_DEPENDENCIES.get(step.name, [])
+
+    if not all(path.exists() for path in expected_outputs):
+        return False
+
+    if not all(path.exists() for path in dependencies):
+        return False
+
+    oldest_output_time = min(path.stat().st_mtime for path in expected_outputs)
+    newest_dependency_time = max(path.stat().st_mtime for path in dependencies)
+
+    return oldest_output_time >= newest_dependency_time
+
+
+def print_reused_ml_step(
+    step_number: int,
+    total_steps: int,
+    step: PipelineStep,
+) -> None:
+    expected_outputs = EXPENSIVE_ML_STEP_OUTPUTS[step.name]
+    dependencies = ML_STEP_DEPENDENCIES.get(step.name, [])
+
+    print()
+    print("=" * 80)
+    print(f"[{step_number}/{total_steps}] {step.name}")
+    print(step.description)
+    print("Reusing existing expensive ML outputs.")
+    print("Reason: output files exist and are newer than dependency files.")
+    print("Expected outputs:")
+    for path in expected_outputs:
+        print(f"- {path.relative_to(ROOT)}")
+    if dependencies:
+        print("Dependency files checked:")
+        for path in dependencies:
+            print(f"- {path.relative_to(ROOT)}")
+    print("=" * 80)
 
 
 def run_step(step_number: int, total_steps: int, step: PipelineStep) -> None:
@@ -180,7 +302,7 @@ def run_step(step_number: int, total_steps: int, step: PipelineStep) -> None:
     print(f"Finished: {step.name} ({elapsed:.1f} seconds)")
 
 
-def run_cleaner(dry_run: bool) -> None:
+def run_cleaner(dry_run: bool, keep_expensive_ml: bool = False) -> None:
     cleaner_path = ROOT / "scripts" / "clean_generated_outputs.py"
 
     if not cleaner_path.exists():
@@ -190,6 +312,9 @@ def run_cleaner(dry_run: bool) -> None:
 
     if not dry_run:
         command.append("--confirm")
+
+    if keep_expensive_ml:
+        command.append("--keep-expensive-ml")
 
     print()
     print("=" * 80)
@@ -240,6 +365,9 @@ def main() -> None:
     if args.summary_only and args.clean_first and not args.dry_run:
         raise SystemExit("--clean-first --summary-only is unsafe without --dry-run.")
 
+    if args.keep_expensive_ml and not args.clean_first:
+        raise SystemExit("--keep-expensive-ml requires --clean-first.")
+
     if args.summary_only:
         steps = [step for step in PIPELINE_STEPS if step.name == "report_summary"]
 
@@ -252,10 +380,15 @@ def main() -> None:
     print("This runner refreshes local outputs using existing raw data.")
     print("It does not download new data.")
     print("It deletes generated parquet outputs only when --clean-first is used.")
+    print("Use --keep-expensive-ml with --clean-first to preserve expensive ML caches.")
+    print("Use --reuse-existing-ml to skip expensive ML stages only when cached outputs are fresh.")
     print()
 
     if args.clean_first:
-        run_cleaner(dry_run=args.dry_run)
+        run_cleaner(
+            dry_run=args.dry_run,
+            keep_expensive_ml=args.keep_expensive_ml,
+        )
 
     if args.dry_run:
         print("DRY RUN ONLY. No commands will be executed.")
@@ -263,13 +396,20 @@ def main() -> None:
         for index, step in enumerate(steps, start=1):
             print(f"{index}. {step.name}")
             print(f"   {step.description}")
-            print(f"   Command: {sys.executable} {' '.join(step.command)}")
+            if args.reuse_existing_ml and should_reuse_existing_ml_step(step):
+                print("   Reuse existing ML outputs: yes")
+            else:
+                print(f"   Command: {sys.executable} {' '.join(step.command)}")
         print()
         return
 
     total_steps = len(steps)
 
     for step_number, step in enumerate(steps, start=1):
+        if args.reuse_existing_ml and should_reuse_existing_ml_step(step):
+            print_reused_ml_step(step_number, total_steps, step)
+            continue
+
         run_step(step_number, total_steps, step)
 
     if args.audit_after:

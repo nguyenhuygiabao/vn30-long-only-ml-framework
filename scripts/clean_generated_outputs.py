@@ -22,6 +22,15 @@ GENERATED_OUTPUTS = [
     ROOT / "data" / "processed" / "tree_model_predictions.parquet",
 ]
 
+EXPENSIVE_ML_OUTPUTS = {
+    ROOT / "data" / "processed" / "ablation_tree_predictions.parquet",
+    ROOT / "data" / "processed" / "classification_model_predictions.parquet",
+    ROOT / "data" / "processed" / "horizon_tree_predictions.parquet",
+    ROOT / "data" / "processed" / "linear_model_predictions.parquet",
+    ROOT / "data" / "processed" / "tree_feature_importance.parquet",
+    ROOT / "data" / "processed" / "tree_model_predictions.parquet",
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -32,14 +41,25 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Actually delete files. Without this flag, the script only previews what would be removed.",
     )
+    parser.add_argument(
+        "--keep-expensive-ml",
+        action="store_true",
+        help="Preserve expensive model prediction/cache parquet files.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
-    existing_files = [path for path in GENERATED_OUTPUTS if path.exists()]
-    missing_files = [path for path in GENERATED_OUTPUTS if not path.exists()]
+    selected_outputs = [
+        path
+        for path in GENERATED_OUTPUTS
+        if not args.keep_expensive_ml or path not in EXPENSIVE_ML_OUTPUTS
+    ]
+
+    existing_files = [path for path in selected_outputs if path.exists()]
+    missing_files = [path for path in selected_outputs if not path.exists()]
 
     print()
     print("VN30 GENERATED OUTPUT CLEANER")
@@ -48,11 +68,15 @@ def main() -> None:
     print()
     print("Scope:")
     print("- Deletes generated data/processed parquet outputs only.")
+    if args.keep_expensive_ml:
+        print("- Preserves expensive ML prediction/cache parquet outputs.")
+    else:
+        print("- Includes expensive ML prediction/cache parquet outputs.")
     print("- Does not delete raw data.")
     print("- Does not delete reports, tables, or figures.")
     print()
 
-    print(f"Generated output files listed: {len(GENERATED_OUTPUTS)}")
+    print(f"Generated output files listed: {len(selected_outputs)}")
     print(f"Existing files found: {len(existing_files)}")
     print(f"Missing files: {len(missing_files)}")
     print()
@@ -70,6 +94,7 @@ def main() -> None:
         print("Dry run only. No files were deleted.")
         print("To delete these files, rerun with:")
         print("  py .\\scripts\\clean_generated_outputs.py --confirm")
+        print("  py .\\scripts\\clean_generated_outputs.py --confirm --keep-expensive-ml")
         print()
         return
 
