@@ -1,87 +1,64 @@
 # VN30 Long-Only Machine Learning Framework
 
-This project predicts which VN30 stocks are most likely to outperform the VN30 benchmark over the next 1, 5, or 10 trading days, then tests those signals under realistic research constraints: walk-forward validation, transaction costs, portfolio limits, and Vietnam-specific market frictions.
+Ranks VN30 stocks by expected 1-, 5-, and 10-day outperformance, then tests whether those signals can support a constrained long-only portfolio.
 
-In plain English: the framework asks, “Can public daily market data help rank VN30 stocks better than a simple benchmark, and can those rankings be turned into a constrained long-only portfolio?”
+The framework uses daily OHLCV data, walk-forward validation, transaction costs, portfolio constraints, and Vietnam-specific market frictions. It is a research project, not a live trading system or investment advice.
 
-This is a research and education project. It is not a live trading system, not financial advice, and not a claim of deployable investment performance.
+## Key result
 
-## Headline result
+**The 10-day horizon is the strongest tested setup so far.**
 
-**The 10-day forecast horizon is currently the strongest tested setup.** In this historical research backtest, the 10-day label has the best Rank IC, top-5 hit rate, diagnostic Sharpe, and final after-cost active return among the tested 1-day, 5-day, and 10-day horizons.
+In the current historical backtest, the 10-day label has the best Rank IC, top-5 hit rate, diagnostic Sharpe, and final after-cost active return among the tested horizons.
 
-The result is promising, but it should be read carefully. The project still has known research limitations, especially static VN30 universe construction, multiple-comparisons risk, and point-estimate performance metrics without confidence intervals.
+Known limitations remain: the VN30 universe is static, results are point estimates, and multiple tested configurations create selection risk.
 
-## What the project does
+## Dashboard
 
-The framework:
-
-- Builds daily OHLCV-based features for VN30 stocks.
-- Creates forward relative-return labels versus the VN30 benchmark.
-- Trains ranking models using time-ordered walk-forward validation.
-- Compares linear, tree-based, gradient boosting, and classification approaches.
-- Tests different forecast horizons and feature ablations.
-- Constructs constrained long-only portfolios from model scores.
-- Applies transaction-cost-aware backtesting.
-- Compares normal execution with price-limit-aware execution.
-- Adds Vietnam-specific controls such as price-limit and herding-risk features.
-- Generates reports, tables, figures, and an interactive HTML dashboard.
-
-## Why this is not just another overfit backtest
-
-Financial machine-learning backtests are easy to overstate. This project tries to reduce that risk by using:
-
-- Walk-forward validation instead of random train-test splitting.
-- Past-only rolling features and risk estimates.
-- Transaction costs and turnover tracking.
-- Long-only portfolio constraints.
-- Forecast-horizon testing instead of reporting only one hand-picked target.
-- Feature ablation tests to check whether feature groups actually add value.
-- Research-validity notes that explicitly flag survivorship bias, multiple comparisons, and missing confidence intervals.
-
-These safeguards do not make the system trade-ready. They make the research process more transparent.
-
-## Interactive dashboard
-
-The main visual entry point is:
+Main report:
 
     reports/dashboard.html
 
-To rebuild and open it locally:
+Rebuild and open locally:
 
     py .\scripts\build_interactive_charts.py
     py .\scripts\build_html_report.py
     start .\reports\dashboard.html
 
-The dashboard includes interactive cumulative return, active drawdown, turnover, rolling diagnostic Sharpe, static diagnostics, latest rankings, latest portfolio weights, glossary, and research-validity notes.
-
-## Quick report summary
-
-For a fast terminal summary of the latest generated reports, tables, and figures, run:
+Quick terminal summary:
 
     py .\scripts\report_summary.py
 
-This prints the best tested horizon, best feature-ablation result, report paths, and figure status. Use this when you want a quick project health check without opening the full dashboard.
+## Method summary
+
+The project includes:
+
+- OHLCV feature engineering
+- Forward relative-return labels versus VN30 benchmark
+- Walk-forward model validation
+- Linear, tree-based, gradient boosting, and classification models
+- Forecast-horizon and feature-ablation tests
+- Long-only portfolio optimization
+- Transaction-cost-aware backtesting
+- Price-limit-aware execution comparison
+- Herding-aware portfolio risk control
+- Static reports and interactive dashboard
 
 ## Key terms
 
-- **Rank IC**: how well the model’s stock ranking matches the actual future return ranking. Higher is better.
-- **Top-5 hit rate**: how often the model’s top-ranked stocks end up among the better realized performers.
-- **Diagnostic Sharpe**: a risk-adjusted performance metric used for comparison inside this research framework.
+- **Rank IC**: correlation between predicted stock ranking and realized future ranking.
+- **Top-5 hit rate**: how often top-ranked stocks become strong realized performers.
+- **Diagnostic Sharpe**: risk-adjusted comparison metric used inside this research framework.
 - **Active return**: return relative to the benchmark or reference portfolio.
-- **After-cost active return**: active return after estimated transaction costs.
+- **After-cost active return**: active return after estimated trading costs.
 - **Max active drawdown**: largest fall from a previous active-return peak.
-- **Walk-forward validation**: train on the past, test on later unseen dates, then move the window forward.
-- **Price-limit-aware execution**: execution logic that accounts for Vietnam-style daily ceiling/floor price constraints.
-- **Herding-aware risk control**: portfolio logic that reduces concentration when market-wide crowding/herding signals look elevated.
-- **Feature ablation**: removing feature groups to test whether they actually improve results.
+- **Walk-forward validation**: train on past data, test on later unseen dates.
+- **Feature ablation**: remove feature groups to test whether they add value.
 
 ## Metric conventions
 
-- Percent-like values in result tables are stored as decimal units. For example, `-0.219472` means about `-21.95%`.
-- Rank IC and diagnostic Sharpe are unitless comparison metrics.
-- Final after-cost active return is shown as cumulative active return in the project’s backtest units, not as a guaranteed live-trading return.
-- Dashboard figures usually format drawdown, turnover, and returns as percentages where appropriate.
+- Decimal values in result tables are often percent-like units. Example: `-0.219472` means about `-21.95%`.
+- Rank IC and diagnostic Sharpe are unitless.
+- Final after-cost active return is a historical backtest metric, not a live-return claim.
 
 ## Data
 
