@@ -400,6 +400,37 @@ def static_grid_html() -> str:
     """
 
 
+
+def research_validity_html() -> str:
+    return """
+    <section class="section-card">
+      <h2>Research validity notes</h2>
+      <p class="muted">
+        This dashboard reports historical diagnostics from a research backtest. The results should not be read as
+        live-trading evidence yet.
+      </p>
+      <div class="validity-grid">
+        <article>
+          <h3>Static universe</h3>
+          <p>The current VN30 universe is fixed rather than point-in-time, so survivorship bias remains a known limitation.</p>
+        </article>
+        <article>
+          <h3>Multiple comparisons</h3>
+          <p>The project tests several horizons, ablations, optimizer variants, and execution settings, so best-case metrics may overstate stable skill.</p>
+        </article>
+        <article>
+          <h3>Point estimates</h3>
+          <p>Sharpe, Rank IC, drawdown, and return metrics are currently point estimates. Bootstrap intervals or deflated Sharpe diagnostics are future upgrades.</p>
+        </article>
+        <article>
+          <h3>Live-market frictions</h3>
+          <p>Corporate actions, foreign ownership room, liquidity, and paper-trading validation must be handled before any live execution claim.</p>
+        </article>
+      </div>
+    </section>
+    """
+
+
 def glossary_html() -> str:
     rows = "\n".join(
         f"""
@@ -695,6 +726,32 @@ def page_html() -> str:
       color: var(--text);
     }}
 
+    .validity-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }}
+
+    .validity-grid article {{
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 14px;
+      background: rgba(8, 13, 28, 0.88);
+      padding: 15px;
+    }}
+
+    .validity-grid h3 {{
+      margin: 0 0 8px;
+      color: var(--text);
+      font-size: 15px;
+    }}
+
+    .validity-grid p {{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }}
+
     .static-grid {{
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -770,6 +827,10 @@ def page_html() -> str:
       .static-grid {{
         grid-template-columns: 1fr;
       }}
+
+      .validity-grid {{
+        grid-template-columns: 1fr;
+      }}
     }}
 
     @media (max-width: 700px) {{
@@ -800,6 +861,8 @@ def page_html() -> str:
     <section class="metric-grid">
       {summary_cards_html()}
     </section>
+
+    {research_validity_html()}
 
     <section class="section-card">
       <h2>Latest stock ranking</h2>

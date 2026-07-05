@@ -138,3 +138,23 @@ The repository contains a reproducible VN30 long-only machine learning research 
 
 The project should be presented as a research framework rather than a deployable live trading strategy. The strongest tested forecast horizon is 10 days, while the original 5-day horizon remains a strong baseline.
 
+## Research validity limitations and next steps
+
+This project is currently a research-grade backtesting framework, not a live trading system. The dashboard and reports should be read as historical diagnostics rather than investment recommendations.
+
+Current methodological limitations:
+
+- Static VN30 universe: the current dataset uses a fixed VN30 stock universe rather than point-in-time VN30 membership. This can create survivorship bias because today's constituents may not fully represent the investable VN30 universe at earlier dates.
+- Multiple comparisons: the project tests multiple forecast horizons, feature ablations, optimizer variants, and execution assumptions on the same historical dataset. The best-looking result may partly reflect search across configurations rather than stable predictive skill.
+- Point-estimate metrics: current Sharpe, Rank IC, drawdown, and return metrics are reported as point estimates. Future versions should add bootstrap confidence intervals or a deflated Sharpe ratio.
+- Baseline comparison: future reports should display ML results directly against simple baselines such as equal-weight VN30 and a simple momentum-only rule.
+- Corporate actions: before relying on automated daily updates, the project should further audit whether OHLCV prices are consistently adjusted for splits, stock dividends, and other HOSE corporate actions.
+- Live-execution frictions: a future live or paper-trading workflow should consider VN-specific constraints such as foreign ownership room, liquidity, price limits, turnover, and realistic order execution.
+
+Priority research upgrades before live trading claims:
+
+1. Add explicit equal-weight and momentum-only baseline comparisons to the dashboard.
+2. Add bootstrap confidence intervals or deflated Sharpe diagnostics.
+3. Replace the static VN30 universe with point-in-time VN30 membership when reliable constituent history is available.
+4. Audit corporate-action adjustment quality in the raw OHLCV source.
+5. Add paper-trading validation before considering any live execution workflow.
