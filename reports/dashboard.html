@@ -466,6 +466,7 @@
 
     <section class="section-card">
       <h2>Baseline comparison</h2>
+<p class="muted"><strong>Equal-weight baseline note:</strong> Equal-weight active return is approximately zero by construction when compared with an equal-weight VN30-style reference. This row confirms benchmark alignment, not a standalone alpha strategy result.</p>
 <p class="muted"><strong>Baseline comparison is included:</strong> ML strategy rows use after-cost active returns. Naive baseline rows use before-cost active returns versus the VN30-style reference. This is a diagnostic comparison, not live-trading evidence.</p>
       <p class="muted">
         Compares the ML strategy with equal-weight VN30-style exposure and simple rule-based baselines.
@@ -1401,6 +1402,7 @@
 
     <section class="section-card">
       <h2>Model comparison diagnostic</h2>
+<p class="muted"><strong>Model-comparison hit-rate note:</strong> Hit rates here use a simpler equal-weight top-5 diagnostic by raw model score, not the optimizer backtest. Use the forecast-horizon table for optimizer-based hit-rate results.</p>
       <p class="muted">
         Compares available linear, tree-based, and classification prediction files using an equal-weight top-5 diagnostic.
         This is not the same as the optimized transaction-cost-aware backtest. Rank IC is unitless, from -1 to +1.

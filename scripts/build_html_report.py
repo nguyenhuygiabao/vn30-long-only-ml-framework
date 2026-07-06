@@ -1639,6 +1639,57 @@ def main() -> None:
     print(f"  {OUTPUT_PATH}")
 
 
+def force_final_review_notes() -> None:
+    import re
+
+    dashboard_path = ROOT / "reports" / "dashboard.html"
+
+    if not dashboard_path.exists():
+        return
+
+    html = dashboard_path.read_text(encoding="utf-8")
+
+    equal_weight_note = (
+        '<p class="muted"><strong>Equal-weight baseline note:</strong> '
+        'Equal-weight active return is approximately zero by construction when compared with an equal-weight VN30-style reference. '
+        'This row confirms benchmark alignment, not a standalone alpha strategy result.</p>'
+    )
+
+    model_hit_note = (
+        '<p class="muted"><strong>Model-comparison hit-rate note:</strong> '
+        'Hit rates here use a simpler equal-weight top-5 diagnostic by raw model score, not the optimizer backtest. '
+        'Use the forecast-horizon table for optimizer-based hit-rate results.</p>'
+    )
+
+    if "Equal-weight active return is approximately zero" not in html:
+        html, count = re.subn(
+            r"(<h2>Baseline comparison</h2>)",
+            r"\1\n" + equal_weight_note,
+            html,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+
+        if count == 0:
+            html = html.replace("</main>", equal_weight_note + "\n</main>", 1)
+
+    if "Hit rates here use a simpler equal-weight top-5 diagnostic" not in html:
+        html, count = re.subn(
+            r"(<h2>Model comparison diagnostic</h2>)",
+            r"\1\n" + model_hit_note,
+            html,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+
+        if count == 0:
+            html = html.replace("</main>", model_hit_note + "\n</main>", 1)
+
+    dashboard_path.write_text(html, encoding="utf-8", newline="\n")
+
+
 if __name__ == "__main__":
     main()
+    postprocess_dashboard_file()
+    force_final_review_notes()
     postprocess_dashboard_file()
