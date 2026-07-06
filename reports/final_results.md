@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-This project builds a VN30 long-only machine learning framework for cross-sectional stock selection. The framework ranks VN30 stocks using daily OHLCV-based features, converts predictions into constrained portfolio weights, and evaluates performance after transaction costs, liquidity penalties, turnover limits, issuer-group caps, and Vietnam-specific price-limit execution rules.
+This project builds a VN30 alpha research framework for cross-sectional stock selection. The framework ranks VN30 stocks using daily OHLCV-based features, converts predictions into constrained portfolio weights, and evaluates performance after transaction costs, liquidity penalties, turnover limits, issuer-group caps, and Vietnam-specific price-limit execution rules.
 
 The final research conclusion is that medium-horizon stock selection is more promising than very short-horizon prediction in this dataset. The 1-day horizon performed poorly and appeared close to noise. The 5-day horizon performed strongly and remains the original baseline. The 10-day horizon produced the strongest tested results across prediction quality, after-cost performance, drawdown, turnover, and diagnostic Sharpe.
 

@@ -121,7 +121,7 @@ def print_figure_summary() -> None:
 
 def main() -> None:
     print()
-    print("VN30 LONG-ONLY ML FRAMEWORK SUMMARY")
+    print("VN30 ALPHA RESEARCH FRAMEWORK SUMMARY")
     print("=" * 60)
     print()
 

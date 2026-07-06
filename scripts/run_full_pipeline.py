@@ -171,7 +171,7 @@ ML_STEP_DEPENDENCIES = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run the VN30 long-only ML framework pipeline.",
+        description="Run the VN30 alpha research framework pipeline.",
     )
     parser.add_argument(
         "--dry-run",
@@ -372,7 +372,7 @@ def main() -> None:
         steps = [step for step in PIPELINE_STEPS if step.name == "report_summary"]
 
     print()
-    print("VN30 LONG-ONLY ML PIPELINE")
+    print("VN30 ALPHA RESEARCH PIPELINE")
     print("=" * 80)
     print(f"Project root: {ROOT}")
     print(f"Python executable: {sys.executable}")

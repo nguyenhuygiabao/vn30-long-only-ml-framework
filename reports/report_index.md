@@ -1,6 +1,6 @@
 # Report Index
 
-This page links the main outputs of the VN30 Long-Only Machine Learning Framework.
+This page links the main outputs of the VN30 Alpha Research Framework.
 
 ## Start here
 

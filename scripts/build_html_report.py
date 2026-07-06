@@ -475,7 +475,7 @@ def page_html() -> str:
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>VN30 Long-Only ML Research Dashboard</title>
+  <title>VN30 Alpha Research Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {{
@@ -850,7 +850,7 @@ def page_html() -> str:
 </head>
 <body>
   <header>
-    <h1>VN30 Long-Only ML Research Dashboard</h1>
+    <h1>VN30 Alpha Research Dashboard</h1>
     <p class="subtitle">
       Interactive dashboard generated from the VN30 machine-learning framework.
       This page is a research summary, not an investment recommendation.

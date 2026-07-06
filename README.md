@@ -1,4 +1,4 @@
-# VN30 Long-Only Machine Learning Framework
+# VN30 Alpha Research Framework
 
 Ranks VN30 stocks by expected 1-, 5-, and 10-day outperformance, then tests whether those signals can support a constrained long-only portfolio.
 
@@ -20,7 +20,7 @@ Main report:
 
 Rebuild and open locally:
 
-    cd vn30-long-only-ml-framework
+    cd vn30-alpha-research
     py .\scripts\build_interactive_charts.py
     py .\scripts\build_html_report.py
     start .\reports\dashboard.html

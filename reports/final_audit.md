@@ -2,7 +2,7 @@
 
 ## 1. Audit Purpose
 
-This file records the final reproducibility and report audit for the VN30 long-only machine learning framework.
+This file records the final reproducibility and report audit for the VN30 alpha research framework.
 
 The goal of the audit is to confirm that the repository contains the final source code, report tables, figures, methodology write-up, final results write-up, and manual checks needed to support the project conclusions.
 
@@ -117,7 +117,7 @@ The project methodology is documented in:
 
 The project passes the final audit.
 
-The repository contains a reproducible VN30 long-only machine learning research framework with:
+The repository contains a reproducible VN30 alpha research machine learning research framework with:
 
 - Data ingestion scripts
 - Feature engineering pipeline

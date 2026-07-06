@@ -2,7 +2,7 @@
 
 ## 1. Project Objective
 
-This project builds a VN30 long-only machine learning framework for ranking large-cap Vietnamese equities and testing whether predictive signals can be converted into a constrained portfolio after transaction costs and Vietnam-specific execution frictions.
+This project builds a VN30 alpha research framework for ranking large-cap Vietnamese equities and testing whether predictive signals can be converted into a constrained portfolio after transaction costs and Vietnam-specific execution frictions.
 
 The objective is not to claim a live trading strategy but to build a research-grade pipeline that connects data ingestion, feature engineering, supervised learning, walk-forward validation, portfolio construction, transaction-cost-aware backtesting, and diagnostic robustness tests.
 
