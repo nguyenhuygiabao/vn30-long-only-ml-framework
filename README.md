@@ -18,6 +18,10 @@ Main report:
 
     reports/dashboard.html
 
+Online dashboard, after GitHub Pages is enabled:
+
+    https://nguyenhuygiabao.github.io/vn30-alpha-research/
+
 Rebuild and open locally:
 
     cd vn30-alpha-research
