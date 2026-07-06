@@ -699,14 +699,12 @@ def main() -> None:
 
     data = read_backtest_returns()
     weights = read_optimized_weights()
-    exposure = read_issuer_group_exposure()
 
     output_paths = [
         build_cumulative_return(data),
         build_drawdown(data),
         build_turnover(data),
         build_rolling_sharpe(data),
-        build_latest_issuer_group_exposure_chart(exposure),
         build_optimizer_cap_hit_chart(weights),
     ]
 

@@ -62,14 +62,6 @@ INTERACTIVE_SECTIONS = [
         "watch": "Look for unstable periods where the rolling Sharpe drops sharply or the band is wide.",
     },
     {
-        "title": "Latest issuer-group exposure chart",
-        "file": "interactive/interactive_latest_issuer_group_exposure.html",
-        "guidance": "Hover over each bar to inspect tickers, weights, and concentration flags.",
-        "meaning": "Shows latest portfolio exposure by issuer group and flags the 40 percent issuer-group cap.",
-        "read": "Longer bars mean more group-level concentration. The vertical reference line marks the 40 percent cap.",
-        "watch": "Vingroup reaches the 40 percent group cap through VHM and VIC in the latest snapshot.",
-    },
-    {
         "title": "Single-name cap-hit share",
         "file": "interactive/interactive_optimizer_cap_hits.html",
         "guidance": "Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario. Double-click a legend item to isolate it.",
