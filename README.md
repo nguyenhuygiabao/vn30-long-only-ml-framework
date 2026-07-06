@@ -14,20 +14,13 @@ Known limitations remain: the VN30 universe is static, results are point estimat
 
 ## Dashboard
 
-Main report:
-
-    reports/dashboard.html
-
-Online dashboard, after GitHub Pages is enabled:
+Public dashboard:
 
     https://nguyenhuygiabao.github.io/vn30-alpha-research/
 
-Rebuild and open locally:
+Repository copy:
 
-    cd vn30-alpha-research
-    py .\scripts\build_interactive_charts.py
-    py .\scripts\build_html_report.py
-    start .\reports\dashboard.html
+    reports/dashboard.html
 
 Quick terminal summary:
 

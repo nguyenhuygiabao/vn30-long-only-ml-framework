@@ -360,6 +360,7 @@ def interactive_section_html(item: dict[str, str]) -> str:
         Double-click a legend item to isolate it.
       </p>
       <iframe src="{escape(versioned)}" title="{escape(item["title"])}" loading="lazy"></iframe>
+      <p><a href="{escape(item["file"])}" target="_blank" rel="noopener">Open chart in a full page</a></p>
       <div class="annotation">
         <p><strong>What this means:</strong> {escape(item["meaning"])}</p>
         <p><strong>How to read it:</strong> {escape(item["read"])}</p>
@@ -526,7 +527,8 @@ def page_html() -> str:
     }}
 
     header::after {{
-      content: "RESEARCH LOCALHOST";
+      content: "";
+      display: none;
       position: absolute;
       top: 26px;
       right: 28px;
