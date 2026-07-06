@@ -255,24 +255,7 @@ data/raw/vnstock/
 
 These files are local reproducible outputs and should not be committed unless they are final report tables or figures.
 
-## Project status and next upgrades
-
-Completed usability upgrades:
-
-- Updated the GitHub README as the project front page
-- Added PROJECT_CONTEXT.md as the reusable project handoff prompt
-- Added reports/report_index.md to link reports, tables, and figures
-- Added scripts/report_summary.py for a quick command-line project summary
-- Added scripts/run_full_pipeline.py for controlled one-command pipeline refresh
-- Added --clean-first to the pipeline runner for optional stale-output cleanup
-- Added --keep-expensive-ml to preserve costly model prediction caches during cleanup
-- Added --reuse-existing-ml to skip expensive ML stages only when cached outputs are fresh
-- Refactored shared modeling helpers into src/modeling_utils.py
-- Added --summary-only to the pipeline runner for quick report checks
-- Added scripts/clean_generated_outputs.py for safe stale-output preview and cleanup
-- Added .gitignore rules so generated raw and processed data stay local
-- Removed the UTF-8 BOM from requirements.txt
-- Made the data-quality report deterministic by removing runtime timestamp noise
+## Next upgrades
 
 Priority next upgrades:
 
@@ -313,10 +296,3 @@ Current methodological limitations:
 - Corporate actions: before relying on automated daily updates, the project should further audit whether OHLCV prices are consistently adjusted for splits, stock dividends, and other HOSE corporate actions.
 - Live-execution frictions: a future live or paper-trading workflow should consider VN-specific constraints such as foreign ownership room, liquidity, price limits, turnover, and realistic order execution.
 
-Priority research upgrades before live trading claims:
-
-1. Add explicit equal-weight and momentum-only baseline comparisons to the dashboard.
-2. Add bootstrap confidence intervals or deflated Sharpe diagnostics.
-3. Replace the static VN30 universe with point-in-time VN30 membership when reliable constituent history is available.
-4. Audit corporate-action adjustment quality in the raw OHLCV source.
-5. Add paper-trading validation before considering any live execution workflow.
