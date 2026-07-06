@@ -272,6 +272,10 @@ Long-term research upgrades:
 - Add macro variables
 - Add reproducible sentiment or news features if reliable sources are available
 
+## License
+
+This project is released under the MIT License. See `LICENSE` for details.
+
 ## Disclaimer
 
 This repository is for research and educational purposes only. It does not provide investment advice and does not claim to be a deployable trading strategy.
