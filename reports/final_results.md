@@ -146,3 +146,45 @@ The final framework supports the idea that medium-horizon VN30 stock selection c
 The project does not claim to be a deployable trading strategy yet. Its value is that it builds a transparent, reproducible, and Vietnam-aware research pipeline that connects data, features, labels, models, validation, portfolio construction, execution frictions, robustness testing, and final reporting.
 
 Future improvements should focus on point-in-time VN30 membership, non-overlapping portfolio evaluation, more realistic order execution, fundamental data, ownership-flow data, and stronger out-of-sample robustness testing.
+
+## Dashboard robustness update
+
+The dashboard now reports several additional diagnostics that improve interpretability and reduce overclaiming.
+
+### Baseline comparison
+
+The dashboard compares the ML strategy against equal-weight VN30-style exposure and simple rule-based baselines. The current baseline table includes equal-weight, top-5 momentum, top-5 reversal, and low-volatility baselines.
+
+The comparison is intentionally conservative in wording because the cost basis differs:
+
+- ML strategy rows are shown as after-cost active return per 5-day forecast period.
+- Naive baseline rows are shown as before-cost active return versus the VN30-style reference per 5-day forecast period.
+
+This means the table is useful as a robustness screen, not a final live-trading comparison.
+
+### Concentration risk
+
+The latest concentration table surfaces:
+
+- max single-name weight
+- number of positions at or above 20 percent
+- HHI
+- effective position count
+- top issuer-group exposure
+- issuer groups at or above 40 percent exposure
+
+The latest snapshot shows Vingroup as the top issuer-group exposure, with VHM and VIC together at 40 percent.
+
+### Latest predicted rank versus realized rank
+
+The latest rank diagnostic compares the model's predicted rank with realized forward-return rank. This makes stock-level hits and misses visible instead of hiding them inside aggregate metrics.
+
+In the latest snapshot, VIC is visible as a top-ranked negative-return miss: predicted rank 3, realized rank 30, realized forward return about -4.55 percent.
+
+### Overlapping-window disclosure
+
+The horizon table now includes overlapping-window disclosure. For the 10-day horizon, the current output reports:
+
+`1,604 evaluated dates (~160 non-overlapping 10-day periods).`
+
+Average after-cost return is measured per forecast period, not annualized.

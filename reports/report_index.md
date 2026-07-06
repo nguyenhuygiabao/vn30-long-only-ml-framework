@@ -41,3 +41,15 @@ Current evidence suggests that the 10-day forward relative-return label is the s
 - code .\reports\report_index.md
 - explorer .\reports\figures
 - explorer .\reports\tables
+
+## Latest dashboard additions
+
+The dashboard now includes the following robustness tables:
+
+- `reports/tables/benchmark_results.csv`: ML strategy comparison against equal-weight and simple rule-based baselines.
+- `reports/tables/concentration_summary.csv`: latest concentration metrics including max single-name weight, HHI, effective position count, and top issuer-group exposure.
+- `reports/tables/issuer_group_exposure_latest.csv`: latest issuer-group exposure by optimization mode.
+- `reports/tables/latest_rank_diagnostic.csv`: latest predicted rank versus realized rank by ticker.
+- `reports/tables/horizon_sample_disclosure.csv`: overlapping-window disclosure and approximate non-overlapping period counts.
+
+The dashboard page at `reports/dashboard.html` displays these diagnostics directly.
