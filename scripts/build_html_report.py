@@ -21,6 +21,8 @@ CONCENTRATION_SUMMARY_PATH = TABLES_DIR / "concentration_summary.csv"
 ISSUER_GROUP_EXPOSURE_PATH = TABLES_DIR / "issuer_group_exposure_latest.csv"
 LATEST_RANK_DIAGNOSTIC_PATH = TABLES_DIR / "latest_rank_diagnostic.csv"
 HORIZON_DISCLOSURE_PATH = TABLES_DIR / "horizon_sample_disclosure.csv"
+MODEL_COMPARISON_PATH = TABLES_DIR / "model_comparison_results.csv"
+OPTIMIZER_BOUND_DIAGNOSTIC_PATH = TABLES_DIR / "optimizer_bound_diagnostic.csv"
 
 TREE_PREDICTIONS_PATH = DATA_DIR / "tree_model_predictions.parquet"
 OPTIMIZED_WEIGHTS_PATH = DATA_DIR / "optimized_weights.parquet"
@@ -99,6 +101,9 @@ GLOSSARY_ROWS = [
     ("HHI", "Sum of squared portfolio weights. Higher values mean more concentration."),
     ("Effective position count", "Inverse of HHI. It translates concentration into an approximate number of equally weighted positions."),
     ("Issuer-group exposure", "Total portfolio weight in tickers that belong to the same issuer group."),
+    ("Cap-hit share", "Share of current holdings that sit at the optimizer's maximum single-name weight."),
+    ("Cumulative active-return sum", "A sum of overlapping active forecast-period returns. It is not a compounded live portfolio return."),
+    ("Model comparison", "A diagnostic comparison using equal-weight top-5 selections by model score. It is not the same as the optimized execution backtest."),
     ("Top-5 hit rate", "How often top-ranked stocks are among better realized performers."),
     ("Model score", "The model's predicted relative return signal."),
 ]
@@ -400,8 +405,10 @@ def benchmark_table_html() -> str:
         "return_volatility",
         "diagnostic_sharpe",
         "max_active_drawdown",
-        "final_cumulative_active_return",
+        "final_cumulative_active_return_sum",
         "average_selected_count",
+        "average_return_period_label",
+        "final_cumulative_active_return_note",
         "cost_note",
     ]
 
@@ -417,7 +424,7 @@ def benchmark_table_html() -> str:
         },
         decimal_columns={
             "diagnostic_sharpe",
-            "final_cumulative_active_return",
+            "final_cumulative_active_return_sum",
             "average_selected_count",
         },
     )
@@ -433,13 +440,14 @@ def concentration_summary_table_html() -> str:
         "total_weight",
         "max_single_name_weight",
         "positions_at_or_above_20pct",
+        "single_name_cap_hit_share",
         "hhi",
         "effective_position_count",
         "top_issuer_group",
         "top_issuer_group_weight",
         "top_issuer_group_tickers",
         "issuer_groups_at_or_above_40pct",
-        "portfolio_turnover",
+        "concentration_flag",
     ]
 
     available = [column for column in columns if column in concentration.columns]
@@ -451,7 +459,7 @@ def concentration_summary_table_html() -> str:
             "total_weight",
             "max_single_name_weight",
             "top_issuer_group_weight",
-            "portfolio_turnover",
+            "single_name_cap_hit_share",
         },
         decimal_columns={
             "hhi",
@@ -472,6 +480,7 @@ def issuer_group_exposure_table_html() -> str:
         "tickers",
         "max_single_name_weight_in_group",
         "weighted_realized_forward_return",
+        "exposure_flag",
     ]
 
     available = [column for column in columns if column in exposure.columns]
@@ -524,6 +533,7 @@ def horizon_disclosure_table_html() -> str:
         "period_label",
         "evaluated_dates",
         "approx_non_overlapping_periods",
+        "overlap_share_estimate",
         "overlap_disclosure",
         "metric_period_note",
     ]
@@ -533,6 +543,79 @@ def horizon_disclosure_table_html() -> str:
     return format_table(
         disclosure[available],
         max_rows=10,
+        percent_columns={"overlap_share_estimate"},
+    )
+
+
+def optimizer_bound_diagnostic_table_html() -> str:
+    diagnostic = read_csv(OPTIMIZER_BOUND_DIAGNOSTIC_PATH)
+
+    columns = [
+        "signal_date",
+        "optimization_mode",
+        "latest_holding_count",
+        "latest_positions_at_20pct_cap",
+        "latest_single_name_cap_hit_share",
+        "latest_all_positions_at_cap",
+        "mean_single_name_cap_hit_share",
+        "share_of_dates_all_positions_at_cap",
+        "latest_hhi",
+        "latest_effective_position_count",
+        "diagnostic_note",
+    ]
+
+    available = [column for column in columns if column in diagnostic.columns]
+
+    return format_table(
+        diagnostic[available],
+        max_rows=10,
+        percent_columns={
+            "latest_single_name_cap_hit_share",
+            "mean_single_name_cap_hit_share",
+            "share_of_dates_all_positions_at_cap",
+        },
+        decimal_columns={
+            "latest_hhi",
+            "latest_effective_position_count",
+        },
+    )
+
+
+def model_comparison_table_html() -> str:
+    comparison = read_csv(MODEL_COMPARISON_PATH)
+
+    columns = [
+        "model_family",
+        "model_name",
+        "evaluated_dates",
+        "average_rank_ic",
+        "average_top5_hit_rate",
+        "average_top5_realized_return_per_5d_period",
+        "return_volatility",
+        "diagnostic_sharpe",
+        "max_drawdown_from_top5_return_sum",
+        "final_cumulative_top5_return_sum",
+        "average_selected_count",
+        "comparison_note",
+    ]
+
+    available = [column for column in columns if column in comparison.columns]
+
+    return format_table(
+        comparison[available],
+        max_rows=12,
+        percent_columns={
+            "average_top5_hit_rate",
+            "average_top5_realized_return_per_5d_period",
+            "return_volatility",
+            "max_drawdown_from_top5_return_sum",
+        },
+        decimal_columns={
+            "average_rank_ic",
+            "diagnostic_sharpe",
+            "final_cumulative_top5_return_sum",
+            "average_selected_count",
+        },
     )
 
 
@@ -1084,9 +1167,21 @@ def page_html() -> str:
       <h2>Latest issuer-group exposure</h2>
       <p class="muted">
         Surfaces issuer groups such as Vingroup where multiple tickers can create hidden concentration.
+        Rows at the 40 percent issuer-group cap are flagged directly.
       </p>
       <div class="table-wrap">
         {issuer_group_exposure_table_html()}
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Optimizer bound diagnostic</h2>
+      <p class="muted">
+        Shows whether the optimizer is genuinely diversifying or mainly hitting the 20 percent single-name cap.
+        The latest snapshot has all five holdings at the single-name cap, so this is a portfolio-construction risk check.
+      </p>
+      <div class="table-wrap">
+        {optimizer_bound_diagnostic_table_html()}
       </div>
     </section>
 
@@ -1140,6 +1235,17 @@ def page_html() -> str:
       </p>
       <div class="table-wrap">
         {horizon_disclosure_table_html()}
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Model comparison diagnostic</h2>
+      <p class="muted">
+        Compares available linear, tree-based, and classification prediction files using an equal-weight top-5 diagnostic.
+        This is not the same as the optimized transaction-cost-aware backtest.
+      </p>
+      <div class="table-wrap">
+        {model_comparison_table_html()}
       </div>
     </section>
 

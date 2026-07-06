@@ -26,6 +26,8 @@ KEY_FILES = [
     ROOT / "reports" / "tables" / "issuer_group_exposure_latest.csv",
     ROOT / "reports" / "tables" / "latest_rank_diagnostic.csv",
     ROOT / "reports" / "tables" / "horizon_sample_disclosure.csv",
+    ROOT / "reports" / "tables" / "model_comparison_results.csv",
+    ROOT / "reports" / "tables" / "optimizer_bound_diagnostic.csv",
     ROOT / "scripts" / "run_full_pipeline.py",
     ROOT / "scripts" / "clean_generated_outputs.py",
     ROOT / "scripts" / "report_summary.py",

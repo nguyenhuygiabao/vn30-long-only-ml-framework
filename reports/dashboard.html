@@ -477,8 +477,10 @@
       <th>return_volatility</th>
       <th>diagnostic_sharpe</th>
       <th>max_active_drawdown</th>
-      <th>final_cumulative_active_return</th>
+      <th>final_cumulative_active_return_sum</th>
       <th>average_selected_count</th>
+      <th>average_return_period_label</th>
+      <th>final_cumulative_active_return_note</th>
       <th>cost_note</th>
     </tr>
   </thead>
@@ -494,6 +496,8 @@
       <td>-25.06%</td>
       <td>30.1672</td>
       <td>11.8080</td>
+      <td>per 5-day forecast period</td>
+      <td>Sum of overlapping 5-day active returns, not a compounded portfolio return.</td>
       <td>Includes estimated commission, slippage, and liquidity penalty.</td>
     </tr>
     <tr>
@@ -507,6 +511,8 @@
       <td>-25.06%</td>
       <td>29.5002</td>
       <td>11.2704</td>
+      <td>per 5-day forecast period</td>
+      <td>Sum of overlapping 5-day active returns, not a compounded portfolio return.</td>
       <td>Includes estimated commission, slippage, and liquidity penalty.</td>
     </tr>
     <tr>
@@ -520,6 +526,8 @@
       <td>-35.59%</td>
       <td>28.7179</td>
       <td>11.3294</td>
+      <td>per 5-day forecast period</td>
+      <td>Sum of overlapping 5-day active returns, not a compounded portfolio return.</td>
       <td>Includes estimated commission, slippage, and liquidity penalty.</td>
     </tr>
     <tr>
@@ -533,6 +541,8 @@
       <td>-35.59%</td>
       <td>29.3603</td>
       <td>11.8682</td>
+      <td>per 5-day forecast period</td>
+      <td>Sum of overlapping 5-day active returns, not a compounded portfolio return.</td>
       <td>Includes estimated commission, slippage, and liquidity penalty.</td>
     </tr>
     <tr>
@@ -546,6 +556,8 @@
       <td>-74.95%</td>
       <td>5.8073</td>
       <td>5.0000</td>
+      <td>per 5-day forecast period</td>
+      <td>Sum of overlapping 5-day active returns, not a compounded portfolio return.</td>
       <td>No transaction-cost adjustment applied to this naive baseline.</td>
     </tr>
     <tr>
@@ -559,6 +571,8 @@
       <td>-171.98%</td>
       <td>-0.2095</td>
       <td>5.0000</td>
+      <td>per 5-day forecast period</td>
+      <td>Sum of overlapping 5-day active returns, not a compounded portfolio return.</td>
       <td>No transaction-cost adjustment applied to this naive baseline.</td>
     </tr>
     <tr>
@@ -572,6 +586,8 @@
       <td>-186.00%</td>
       <td>-1.5491</td>
       <td>10.0000</td>
+      <td>per 5-day forecast period</td>
+      <td>Sum of overlapping 5-day active returns, not a compounded portfolio return.</td>
       <td>No transaction-cost adjustment applied to this naive baseline.</td>
     </tr>
     <tr>
@@ -585,6 +601,8 @@
       <td>-0.00%</td>
       <td>-0.0000</td>
       <td>28.9627</td>
+      <td>per 5-day forecast period</td>
+      <td>Sum of overlapping 5-day active returns, not a compounded portfolio return.</td>
       <td>No transaction-cost adjustment applied to this naive baseline.</td>
     </tr>
   </tbody>
@@ -608,13 +626,14 @@
       <th>total_weight</th>
       <th>max_single_name_weight</th>
       <th>positions_at_or_above_20pct</th>
+      <th>single_name_cap_hit_share</th>
       <th>hhi</th>
       <th>effective_position_count</th>
       <th>top_issuer_group</th>
       <th>top_issuer_group_weight</th>
       <th>top_issuer_group_tickers</th>
       <th>issuer_groups_at_or_above_40pct</th>
-      <th>portfolio_turnover</th>
+      <th>concentration_flag</th>
     </tr>
   </thead>
   <tbody>
@@ -625,13 +644,14 @@
       <td>100.00%</td>
       <td>20.00%</td>
       <td>5</td>
+      <td>100.00%</td>
       <td>0.2000</td>
       <td>5.0000</td>
       <td>Vingroup</td>
       <td>40.00%</td>
       <td>VHM, VIC</td>
       <td>1</td>
-      <td>40.00%</td>
+      <td>all_positions_at_20pct_cap; issuer_group_at_40pct_cap; low_effective_position_count</td>
     </tr>
     <tr>
       <td>2026-06-23</td>
@@ -640,13 +660,14 @@
       <td>100.00%</td>
       <td>20.00%</td>
       <td>5</td>
+      <td>100.00%</td>
       <td>0.2000</td>
       <td>5.0000</td>
       <td>Vingroup</td>
       <td>40.00%</td>
       <td>VHM, VIC</td>
       <td>1</td>
-      <td>40.00%</td>
+      <td>all_positions_at_20pct_cap; issuer_group_at_40pct_cap; low_effective_position_count</td>
     </tr>
   </tbody>
 </table>
@@ -657,6 +678,7 @@
       <h2>Latest issuer-group exposure</h2>
       <p class="muted">
         Surfaces issuer groups such as Vingroup where multiple tickers can create hidden concentration.
+        Rows at the 40 percent issuer-group cap are flagged directly.
       </p>
       <div class="table-wrap">
         <table class="dataframe data-table">
@@ -670,6 +692,7 @@
       <th>tickers</th>
       <th>max_single_name_weight_in_group</th>
       <th>weighted_realized_forward_return</th>
+      <th>exposure_flag</th>
     </tr>
   </thead>
   <tbody>
@@ -682,6 +705,7 @@
       <td>VHM, VIC</td>
       <td>20.00%</td>
       <td>-1.97%</td>
+      <td>issuer_group_at_40pct_cap</td>
     </tr>
     <tr>
       <td>2026-06-23</td>
@@ -692,6 +716,7 @@
       <td>SAB</td>
       <td>20.00%</td>
       <td>1.03%</td>
+      <td>normal</td>
     </tr>
     <tr>
       <td>2026-06-23</td>
@@ -702,6 +727,7 @@
       <td>SSB</td>
       <td>20.00%</td>
       <td>6.69%</td>
+      <td>normal</td>
     </tr>
     <tr>
       <td>2026-06-23</td>
@@ -712,6 +738,7 @@
       <td>VCB</td>
       <td>20.00%</td>
       <td>1.04%</td>
+      <td>normal</td>
     </tr>
     <tr>
       <td>2026-06-23</td>
@@ -722,6 +749,7 @@
       <td>VHM, VIC</td>
       <td>20.00%</td>
       <td>-1.97%</td>
+      <td>issuer_group_at_40pct_cap</td>
     </tr>
     <tr>
       <td>2026-06-23</td>
@@ -732,6 +760,7 @@
       <td>SAB</td>
       <td>20.00%</td>
       <td>1.03%</td>
+      <td>normal</td>
     </tr>
     <tr>
       <td>2026-06-23</td>
@@ -742,6 +771,7 @@
       <td>SSB</td>
       <td>20.00%</td>
       <td>6.69%</td>
+      <td>normal</td>
     </tr>
     <tr>
       <td>2026-06-23</td>
@@ -752,6 +782,62 @@
       <td>VCB</td>
       <td>20.00%</td>
       <td>1.04%</td>
+      <td>normal</td>
+    </tr>
+  </tbody>
+</table>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Optimizer bound diagnostic</h2>
+      <p class="muted">
+        Shows whether the optimizer is genuinely diversifying or mainly hitting the 20 percent single-name cap.
+        The latest snapshot has all five holdings at the single-name cap, so this is a portfolio-construction risk check.
+      </p>
+      <div class="table-wrap">
+        <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>signal_date</th>
+      <th>optimization_mode</th>
+      <th>latest_holding_count</th>
+      <th>latest_positions_at_20pct_cap</th>
+      <th>latest_single_name_cap_hit_share</th>
+      <th>latest_all_positions_at_cap</th>
+      <th>mean_single_name_cap_hit_share</th>
+      <th>share_of_dates_all_positions_at_cap</th>
+      <th>latest_hhi</th>
+      <th>latest_effective_position_count</th>
+      <th>diagnostic_note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2026-06-23</td>
+      <td>herding_aware</td>
+      <td>5</td>
+      <td>5</td>
+      <td>100.00%</td>
+      <td>True</td>
+      <td>29.44%</td>
+      <td>26.04%</td>
+      <td>0.2000</td>
+      <td>5.0000</td>
+      <td>High cap-hit share means the optimizer is often constrained by the 20% single-name limit.</td>
+    </tr>
+    <tr>
+      <td>2026-06-23</td>
+      <td>normal</td>
+      <td>5</td>
+      <td>5</td>
+      <td>100.00%</td>
+      <td>True</td>
+      <td>34.31%</td>
+      <td>30.27%</td>
+      <td>0.2000</td>
+      <td>5.0000</td>
+      <td>High cap-hit share means the optimizer is often constrained by the 20% single-name limit.</td>
     </tr>
   </tbody>
 </table>
@@ -1260,6 +1346,7 @@
       <th>period_label</th>
       <th>evaluated_dates</th>
       <th>approx_non_overlapping_periods</th>
+      <th>overlap_share_estimate</th>
       <th>overlap_disclosure</th>
       <th>metric_period_note</th>
     </tr>
@@ -1270,6 +1357,7 @@
       <td>1d forecast period</td>
       <td>1613</td>
       <td>1613</td>
+      <td>0.00%</td>
       <td>1,613 evaluated dates (~1,613 non-overlapping 1-day periods).</td>
       <td>Average after-cost return is measured per forecast period, not annualized.</td>
     </tr>
@@ -1278,6 +1366,7 @@
       <td>5d forecast period</td>
       <td>1609</td>
       <td>321</td>
+      <td>80.05%</td>
       <td>1,609 evaluated dates (~321 non-overlapping 5-day periods).</td>
       <td>Average after-cost return is measured per forecast period, not annualized.</td>
     </tr>
@@ -1286,8 +1375,109 @@
       <td>10d forecast period</td>
       <td>1604</td>
       <td>160</td>
+      <td>90.02%</td>
       <td>1,604 evaluated dates (~160 non-overlapping 10-day periods).</td>
       <td>Average after-cost return is measured per forecast period, not annualized.</td>
+    </tr>
+  </tbody>
+</table>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Model comparison diagnostic</h2>
+      <p class="muted">
+        Compares available linear, tree-based, and classification prediction files using an equal-weight top-5 diagnostic.
+        This is not the same as the optimized transaction-cost-aware backtest.
+      </p>
+      <div class="table-wrap">
+        <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model_family</th>
+      <th>model_name</th>
+      <th>evaluated_dates</th>
+      <th>average_rank_ic</th>
+      <th>average_top5_hit_rate</th>
+      <th>average_top5_realized_return_per_5d_period</th>
+      <th>return_volatility</th>
+      <th>diagnostic_sharpe</th>
+      <th>max_drawdown_from_top5_return_sum</th>
+      <th>final_cumulative_top5_return_sum</th>
+      <th>average_selected_count</th>
+      <th>comparison_note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>tree</td>
+      <td>gradient_boosting</td>
+      <td>1609</td>
+      <td>0.3380</td>
+      <td>37.43%</td>
+      <td>2.36%</td>
+      <td>2.45%</td>
+      <td>0.9642</td>
+      <td>-19.27%</td>
+      <td>38.0268</td>
+      <td>5.0000</td>
+      <td>Equal-weight top-5 by model score; diagnostic only, not optimizer/backtest execution.</td>
+    </tr>
+    <tr>
+      <td>tree</td>
+      <td>random_forest</td>
+      <td>1609</td>
+      <td>0.3129</td>
+      <td>36.59%</td>
+      <td>2.24%</td>
+      <td>2.55%</td>
+      <td>0.8768</td>
+      <td>-16.53%</td>
+      <td>36.0455</td>
+      <td>5.0000</td>
+      <td>Equal-weight top-5 by model score; diagnostic only, not optimizer/backtest execution.</td>
+    </tr>
+    <tr>
+      <td>linear</td>
+      <td>elastic_net</td>
+      <td>1609</td>
+      <td>0.2363</td>
+      <td>30.49%</td>
+      <td>1.66%</td>
+      <td>2.39%</td>
+      <td>0.6962</td>
+      <td>-19.63%</td>
+      <td>26.7511</td>
+      <td>5.0000</td>
+      <td>Equal-weight top-5 by model score; diagnostic only, not optimizer/backtest execution.</td>
+    </tr>
+    <tr>
+      <td>linear</td>
+      <td>ridge</td>
+      <td>1609</td>
+      <td>0.2273</td>
+      <td>30.24%</td>
+      <td>1.62%</td>
+      <td>2.35%</td>
+      <td>0.6903</td>
+      <td>-17.71%</td>
+      <td>26.0789</td>
+      <td>5.0000</td>
+      <td>Equal-weight top-5 by model score; diagnostic only, not optimizer/backtest execution.</td>
+    </tr>
+    <tr>
+      <td>classification</td>
+      <td>classification</td>
+      <td>1609</td>
+      <td>0.1899</td>
+      <td>29.43%</td>
+      <td>1.35%</td>
+      <td>2.27%</td>
+      <td>0.5923</td>
+      <td>-14.13%</td>
+      <td>21.6784</td>
+      <td>5.0000</td>
+      <td>Equal-weight top-5 by model score; diagnostic only, not optimizer/backtest execution.</td>
     </tr>
   </tbody>
 </table>
@@ -1386,7 +1576,7 @@
         Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
         Double-click a legend item to isolate it.
       </p>
-      <iframe src="interactive/interactive_cumulative_return.html?v=1783324804" title="Cumulative after-cost active return" loading="lazy"></iframe>
+      <iframe src="interactive/interactive_cumulative_return.html?v=1783326359" title="Cumulative after-cost active return" loading="lazy"></iframe>
       <p><a href="interactive/interactive_cumulative_return.html" target="_blank" rel="noopener">Open chart in a full page</a></p>
       <div class="annotation">
         <p><strong>What this means:</strong> Shows whether the strategy builds active value over time after estimated trading costs.</p>
@@ -1402,7 +1592,7 @@
         Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
         Double-click a legend item to isolate it.
       </p>
-      <iframe src="interactive/interactive_active_drawdown.html?v=1783324804" title="Active drawdown" loading="lazy"></iframe>
+      <iframe src="interactive/interactive_active_drawdown.html?v=1783326359" title="Active drawdown" loading="lazy"></iframe>
       <p><a href="interactive/interactive_active_drawdown.html" target="_blank" rel="noopener">Open chart in a full page</a></p>
       <div class="annotation">
         <p><strong>What this means:</strong> Shows how far the strategy falls below its previous active-return peak.</p>
@@ -1418,7 +1608,7 @@
         Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
         Double-click a legend item to isolate it.
       </p>
-      <iframe src="interactive/interactive_portfolio_turnover.html?v=1783324804" title="Portfolio turnover" loading="lazy"></iframe>
+      <iframe src="interactive/interactive_portfolio_turnover.html?v=1783326359" title="Portfolio turnover" loading="lazy"></iframe>
       <p><a href="interactive/interactive_portfolio_turnover.html" target="_blank" rel="noopener">Open chart in a full page</a></p>
       <div class="annotation">
         <p><strong>What this means:</strong> Shows how much the portfolio changes between rebalancing dates.</p>
@@ -1434,7 +1624,7 @@
         Use the date buttons or bottom slider to zoom. Click a legend item to hide/show a scenario.
         Double-click a legend item to isolate it.
       </p>
-      <iframe src="interactive/interactive_rolling_diagnostic_sharpe.html?v=1783324804" title="Rolling 60-day diagnostic Sharpe" loading="lazy"></iframe>
+      <iframe src="interactive/interactive_rolling_diagnostic_sharpe.html?v=1783326359" title="Rolling 60-day diagnostic Sharpe" loading="lazy"></iframe>
       <p><a href="interactive/interactive_rolling_diagnostic_sharpe.html" target="_blank" rel="noopener">Open chart in a full page</a></p>
       <div class="annotation">
         <p><strong>What this means:</strong> Shows short-term risk-adjusted performance over rolling 60-trading-day windows.</p>
@@ -1574,6 +1764,24 @@
         <tr>
           <td>Issuer-group exposure</td>
           <td>Total portfolio weight in tickers that belong to the same issuer group.</td>
+        </tr>
+
+
+        <tr>
+          <td>Cap-hit share</td>
+          <td>Share of current holdings that sit at the optimizer&#x27;s maximum single-name weight.</td>
+        </tr>
+
+
+        <tr>
+          <td>Cumulative active-return sum</td>
+          <td>A sum of overlapping active forecast-period returns. It is not a compounded live portfolio return.</td>
+        </tr>
+
+
+        <tr>
+          <td>Model comparison</td>
+          <td>A diagnostic comparison using equal-weight top-5 selections by model score. It is not the same as the optimized execution backtest.</td>
         </tr>
 
 
