@@ -8,7 +8,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 KEY_FILES = [
     ROOT / "README.md",
-    ROOT / "PROJECT_CONTEXT.md",
     ROOT / "reports" / "report_index.md",
     ROOT / "reports" / "final_results.md",
     ROOT / "reports" / "methodology.md",

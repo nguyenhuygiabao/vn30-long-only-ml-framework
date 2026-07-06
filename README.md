@@ -259,7 +259,7 @@ These files are local reproducible outputs and should not be committed unless th
 
 Priority next upgrades:
 
-- Keep PROJECT_CONTEXT.md updated after major project changes
+- Keep README and final audit notes updated after major project changes
 - Add a clean audit/update workflow after each rerun
 - Add optional daily auto-update later through Windows Task Scheduler or GitHub Actions
 - Add a Streamlit dashboard for tables and figures
@@ -295,4 +295,3 @@ Current methodological limitations:
 - Baseline comparison: future reports should display ML results directly against simple baselines such as equal-weight VN30 and a simple momentum-only rule.
 - Corporate actions: before relying on automated daily updates, the project should further audit whether OHLCV prices are consistently adjusted for splits, stock dividends, and other HOSE corporate actions.
 - Live-execution frictions: a future live or paper-trading workflow should consider VN-specific constraints such as foreign ownership room, liquidity, price limits, turnover, and realistic order execution.
-
