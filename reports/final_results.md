@@ -15,19 +15,19 @@ The main portfolio backtest compares two optimizer modes and two execution modes
 The optimizer modes are:
 
 - `normal`: standard constrained long-only optimizer.
-- `herding_aware`: reduced exposure and concentration during high-herding market states.
+- `Herding Aware`: reduced exposure and concentration during high-herding market states.
 
 The execution modes are:
 
 - `normal`: assumes intended trades can be executed.
-- `price_limit_aware`: blocks unrealistic buys at ceiling closes and sells at floor closes.
+- `Price Limit Aware`: blocks unrealistic buys at ceiling closes and sells at floor closes.
 
 | Optimizer Mode | Execution Mode | Diagnostic Sharpe | Max Active Drawdown | Average Turnover | Final Cumulative After-Cost Active Return |
 |---|---:|---:|---:|---:|---:|
 | normal | normal | 0.873634 | -0.278142 | 0.357871 | 32.377818 |
-| normal | price_limit_aware | 0.860436 | -0.370818 | 0.353277 | 31.487395 |
-| herding_aware | normal | 0.872999 | -0.278142 | 0.351899 | 31.703161 |
-| herding_aware | price_limit_aware | 0.860766 | -0.370818 | 0.347622 | 30.885591 |
+| normal | Price Limit Aware | 0.860436 | -0.370818 | 0.353277 | 31.487395 |
+| Herding Aware | normal | 0.872999 | -0.278142 | 0.351899 | 31.703161 |
+| Herding Aware | Price Limit Aware | 0.860766 | -0.370818 | 0.347622 | 30.885591 |
 
 The normal optimizer produced the highest final cumulative after-cost active return. The herding-aware optimizer slightly reduced turnover and concentration but gave up some return. Price-limit-aware execution reduced performance compared with normal execution, which is expected because it makes the backtest more conservative and realistic.
 
@@ -37,7 +37,7 @@ The strongest pure-return configuration was:
 
 The more realistic Vietnam-friction-aware configuration was:
 
-`normal optimizer + price_limit_aware execution`
+`normal optimizer + Price Limit Aware execution`
 
 For final interpretation, the price-limit-aware result is more useful because it accounts for Vietnam’s daily ceiling and floor trading constraints.
 
@@ -63,11 +63,11 @@ Feature ablation removes one feature group at a time and compares the resulting 
 
 | Ablation Setting | Feature Count | Average Rank IC | Top-5 Hit Rate | Top-5 Average Actual Return | Diagnostic Sharpe | Max Active Drawdown | Average Turnover | Final Cumulative After-Cost Active Return |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| all_features | 51 | 0.018626 | 0.460913 | 0.019013 | 0.603317% | -0.355852 | 0.354637 | 29.360326 |
-| without_herding | 41 | 0.337983 | 0.676321 | 0.023677 | 0.827557 | -0.355852 | 0.356006 | 29.281588 |
-| without_price_limit | 36 | 0.316762 | 0.666128 | 0.022343 | 0.784717 | -0.359316 | 0.361541 | 27.268516 |
-| without_risk | 49 | 0.314453 | 0.657303 | 0.021847 | 0.749285 | -0.363631 | 0.365078 | 26.301430 |
-| without_volume_liquidity | 40 | 0.307164 | 0.655065 | 0.021507 | 0.742006 | -0.322599 | 0.361687 | 26.341446 |
+| All features | 51 | 0.018626 | 0.460913 | 0.019013 | 0.603317% | -0.355852 | 0.354637 | 29.360326 |
+| Excluding herding features | 41 | 0.337983 | 0.676321 | 0.023677 | 0.827557 | -0.355852 | 0.356006 | 29.281588 |
+| Excluding price-limit features | 36 | 0.316762 | 0.666128 | 0.022343 | 0.784717 | -0.359316 | 0.361541 | 27.268516 |
+| Excluding risk features | 49 | 0.314453 | 0.657303 | 0.021847 | 0.749285 | -0.363631 | 0.365078 | 26.301430 |
+| Excluding volume/liquidity | 40 | 0.307164 | 0.655065 | 0.021507 | 0.742006 | -0.322599 | 0.361687 | 26.341446 |
 
 The full feature set produced the strongest overall result. Removing herding features had only a small effect on raw prediction quality, which suggests that herding features are not the main source of alpha in the model.
 
@@ -77,7 +77,7 @@ The largest performance drops came from removing volume/liquidity, price-limit, 
 
 The selected predictive model is:
 
-`gradient_boosting`
+`Gradient Boosting`
 
 The selected research horizon is:
 
@@ -85,7 +85,7 @@ The selected research horizon is:
 
 The selected realistic execution setting is:
 
-`price_limit_aware`
+`Price Limit Aware`
 
 The selected portfolio construction style is:
 
@@ -103,10 +103,10 @@ The final report figures are stored in:
 
 The key figures are:
 
-- `top_gradient_boosting_feature_importance.png`
-- `ablation_diagnostic_sharpe.png`
-- `horizon_diagnostic_sharpe.png`
-- `horizon_rank_ic.png`
+- `Top Gradient Boosting Feature Importance.png`
+- `Ablation Diagnostic Sharpe.png`
+- `Horizon Diagnostic Sharpe.png`
+- `Horizon Rank Ic.png`
 
 Together, these figures show portfolio performance, drawdown behavior, turnover, stability over time, feature importance, feature ablation, and forecast-horizon comparison.
 

@@ -22,7 +22,7 @@ Repository copy:
 
 Quick terminal summary:
 
-    py .\scripts\report_summary.py
+    py .\scripts\Report Summary.py
 
 ## Method summary
 
@@ -132,11 +132,11 @@ After purging, feature ablation differences are small and should be treated as d
 
 | Feature Set | Feature Count | Average Rank IC | Top-5 Hit Rate | Diagnostic Sharpe | Final Cumulative After-Cost Active Return | Evaluated Dates |
 |---|---:|---:|---:|---:|---:|---:|
-| without_volume_liquidity | 40 | 0.021964 | 0.473546 | 0.033764 | 1.065% | 1599 |
-| all_features | 51 | 0.018626 | 0.460913 | 0.019013 | 0.603% | 1599 |
-| without_herding | 41 | 0.017576 | 0.459287 | 0.018505 | 0.584% | 1599 |
-| without_risk | 49 | 0.018399 | 0.461288 | 0.015306 | 0.463% | 1599 |
-| without_price_limit | 36 | 0.011299 | 0.453158 | -0.011933 | -0.352% | 1599 |
+| Excluding volume/liquidity | 40 | 0.021964 | 0.473546 | 0.033764 | 1.065% | 1599 |
+| All features | 51 | 0.018626 | 0.460913 | 0.019013 | 0.603% | 1599 |
+| Excluding herding features | 41 | 0.017576 | 0.459287 | 0.018505 | 0.584% | 1599 |
+| Excluding risk features | 49 | 0.018399 | 0.461288 | 0.015306 | 0.463% | 1599 |
+| Excluding price-limit features | 36 | 0.011299 | 0.453158 | -0.011933 | -0.352% | 1599 |
 
 Interpretation:
 
@@ -149,32 +149,32 @@ Interpretation:
 Open these first:
 
 ```text
-reports/final_results.md
+reports/Final Results.md
 reports/methodology.md
-reports/final_audit.md
+reports/Final Audit.md
 ```
 
 Additional reports:
 
 ```text
-reports/model_report.md
+reports/Model Report.md
 reports/data_quality_report.md
 ```
 
 ## Tables
 
 ```text
-reports/tables/ablation_results.csv
-reports/tables/horizon_results.csv
+reports/tables/Ablation Results.csv
+reports/tables/Horizon Results.csv
 ```
 
 ## Figures
 
 ```text
-reports/figures/top_gradient_boosting_feature_importance.png
-reports/figures/ablation_diagnostic_sharpe.png
-reports/figures/horizon_diagnostic_sharpe.png
-reports/figures/horizon_rank_ic.png
+reports/figures/Top Gradient Boosting Feature Importance.png
+reports/figures/Ablation Diagnostic Sharpe.png
+reports/figures/Horizon Diagnostic Sharpe.png
+reports/figures/Horizon Rank Ic.png
 ```
 
 ## How to view outputs locally
@@ -182,9 +182,9 @@ reports/figures/horizon_rank_ic.png
 Open reports in VS Code:
 
 ```powershell
-code .\reports\final_results.md
+code .\reports\Final Results.md
 code .\reports\methodology.md
-code .\reports\final_audit.md
+code .\reports\Final Audit.md
 ```
 
 Preview Markdown in VS Code:
@@ -210,7 +210,7 @@ explorer .\reports\tables
 The main local runner is:
 
 ```powershell
-py .\scripts\run_full_pipeline.py
+py .\scripts\Run Full Pipeline.py
 ```
 
 This runner refreshes outputs from existing local raw data only. It does not download or update live market data yet.
@@ -220,7 +220,7 @@ This runner refreshes outputs from existing local raw data only. It does not dow
 Use this when you want to rebuild generated outputs from existing raw data:
 
 ```powershell
-py .\scripts\run_full_pipeline.py --clean-first --audit-after
+py .\scripts\Run Full Pipeline.py --clean-first --audit-after
 ```
 
 ### Faster local refresh
@@ -228,7 +228,7 @@ py .\scripts\run_full_pipeline.py --clean-first --audit-after
 Use this when you want to preserve expensive ML prediction caches and reuse them only when they are still fresh:
 
 ```powershell
-py .\scripts\run_full_pipeline.py --clean-first --keep-expensive-ml --reuse-existing-ml --audit-after
+py .\scripts\Run Full Pipeline.py --clean-first --keep-expensive-ml --reuse-existing-ml --audit-after
 ```
 
 Cache reuse is stale-aware. If features, labels, or relevant model source files change, the affected ML stages rerun automatically.

@@ -42,7 +42,7 @@ The main label family is:
 
 The original baseline design used the 5-day label:
 
-`forward_relative_return_5d`
+`Forward Relative Return 5D`
 
 This label asks whether a stock outperforms the VN30 benchmark over the next five trading days. Later horizon testing compared 1-day, 5-day, and 10-day labels. The horizon experiment found that the 10-day horizon produced the strongest diagnostic performance in this dataset, while the 5-day horizon remains a useful baseline.
 
@@ -64,7 +64,7 @@ Herding features measure market-wide crowding behavior. These include return dis
 
 The combined feature dataset is saved locally as:
 
-`data/processed/features_combined.parquet`
+`data/processed/Features Combined.parquet`
 
 Generated parquet files are not committed to Git because they are reproducible outputs rather than source files.
 

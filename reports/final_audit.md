@@ -32,7 +32,7 @@ These files are excluded from the committed research artifact because they are g
 
 All Python files were compiled with:
 
-`Get-ChildItem -Recurse -Filter *.py | ForEach-Object { py -m py_compile $_.FullName }`
+`Get-ChildItem -Recurse -Filter *.py | ForEach-Object { py -m Py Compile $_.FullName }`
 
 The command completed without Python compilation errors.
 
@@ -40,12 +40,12 @@ The command completed without Python compilation errors.
 
 The final report-producing scripts were rerun:
 
-- `py -m src.horizon_tests`
-- `py -m src.visualize_results`
+- `py -m src.Horizon Tests`
+- `py -m src.Visualize Results`
 
 The horizon script regenerated:
 
-`reports/tables/horizon_results.csv`
+`reports/tables/Horizon Results.csv`
 
 The visualization script regenerated the final figure set in:
 
@@ -55,7 +55,7 @@ The visualization script regenerated the final figure set in:
 
 The final horizon manual check was rerun:
 
-`py .\tests\manual_check_horizon_tests.py`
+`py .\tests\Manual Check Horizon Tests.py`
 
 The check confirmed:
 
@@ -78,32 +78,32 @@ The final horizon result supports the conclusion that the 10-day forecast horizo
 
 The final visualization manual check was rerun:
 
-`py .\tests\manual_check_visualize_results.py`
+`py .\tests\Manual Check Visualize Results.py`
 
 The check confirmed that all expected figures exist and are non-empty.
 
 The verified final figures are:
 
-- `top_gradient_boosting_feature_importance.png`
-- `ablation_diagnostic_sharpe.png`
-- `horizon_diagnostic_sharpe.png`
-- `horizon_rank_ic.png`
+- `Top Gradient Boosting Feature Importance.png`
+- `Ablation Diagnostic Sharpe.png`
+- `Horizon Diagnostic Sharpe.png`
+- `Horizon Rank Ic.png`
 
 ## 7. Final Report Artifacts
 
 The final report folder contains:
 
 - `reports/methodology.md`
-- `reports/final_results.md`
-- `reports/model_report.md`
+- `reports/Final Results.md`
+- `reports/Model Report.md`
 - `reports/data_quality_report.md`
-- `reports/tables/ablation_results.csv`
-- `reports/tables/horizon_results.csv`
+- `reports/tables/Ablation Results.csv`
+- `reports/tables/Horizon Results.csv`
 - `reports/figures/`
 
 The main final interpretation is documented in:
 
-`reports/final_results.md`
+`reports/Final Results.md`
 
 The project methodology is documented in:
 

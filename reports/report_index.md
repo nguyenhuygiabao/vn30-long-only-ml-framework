@@ -6,26 +6,26 @@ This page links the main outputs of the VN30 Alpha Research Framework.
 
 - [HTML Dashboard](dashboard.html): visual dashboard with stock ranking, portfolio weights, figures, and metric glossary.
 - [Project Context](../PROJECT_CONTEXT.md): reusable handoff prompt for continuing the project in a new coding session.
-- [Final Results](final_results.md): main findings, backtest results, horizon tests, ablation tests, figures, limitations, and conclusion.
+- [Final Results](Final Results.md): main findings, backtest results, horizon tests, ablation tests, figures, limitations, and conclusion.
 - [Methodology](methodology.md): data, labels, features, models, validation, optimizer, backtester, transaction costs, and bias controls.
-- [Final Audit](final_audit.md): final repo state, script reruns, verification checks, and artifact audit.
+- [Final Audit](Final Audit.md): final repo state, script reruns, verification checks, and artifact audit.
 
 ## Supporting reports
 
-- [Model Report](model_report.md): model evaluation details.
+- [Model Report](Model Report.md): model evaluation details.
 - [Data Quality Report](data_quality_report.md): data coverage and quality checks.
 
 ## Result tables
 
-- [Ablation Results](tables/ablation_results.csv): feature-ablation results.
-- [Horizon Results](tables/horizon_results.csv): forecast-horizon results.
+- [Ablation Results](tables/Ablation Results.csv): feature-ablation results.
+- [Horizon Results](tables/Horizon Results.csv): forecast-horizon results.
 
 ## Main figures
 
-- [Top Gradient Boosting Feature Importance](figures/top_gradient_boosting_feature_importance.png)
-- [Ablation Diagnostic Sharpe](figures/ablation_diagnostic_sharpe.png)
-- [Horizon Diagnostic Sharpe](figures/horizon_diagnostic_sharpe.png)
-- [Horizon Rank IC](figures/horizon_rank_ic.png)
+- [Top Gradient Boosting Feature Importance](figures/Top Gradient Boosting Feature Importance.png)
+- [Ablation Diagnostic Sharpe](figures/Ablation Diagnostic Sharpe.png)
+- [Horizon Diagnostic Sharpe](figures/Horizon Diagnostic Sharpe.png)
+- [Horizon Rank IC](figures/Horizon Rank Ic.png)
 
 ## Current conclusion
 
@@ -35,10 +35,10 @@ Current evidence suggests that the 10-day forward relative-return label is the s
 
 ## Local viewing commands
 
-- code .\reports\final_results.md
+- code .\reports\Final Results.md
 - code .\reports\methodology.md
-- code .\reports\final_audit.md
-- code .\reports\report_index.md
+- code .\reports\Final Audit.md
+- code .\reports\Report Index.md
 - explorer .\reports\figures
 - explorer .\reports\tables
 
@@ -46,10 +46,10 @@ Current evidence suggests that the 10-day forward relative-return label is the s
 
 The dashboard now includes the following robustness tables:
 
-- `reports/tables/benchmark_results.csv`: ML strategy comparison against equal-weight and simple rule-based baselines.
-- `reports/tables/concentration_summary.csv`: latest concentration metrics including max single-name weight, HHI, effective position count, and top issuer-group exposure.
-- `reports/tables/issuer_group_exposure_latest.csv`: latest issuer-group exposure by optimization mode.
-- `reports/tables/latest_rank_diagnostic.csv`: latest predicted rank versus realized rank by ticker.
-- `reports/tables/horizon_sample_disclosure.csv`: overlapping-window disclosure and approximate non-overlapping period counts.
+- `reports/tables/Benchmark Results.csv`: ML strategy comparison against equal-weight and simple rule-based baselines.
+- `reports/tables/Concentration Summary.csv`: latest concentration metrics including max single-name weight, HHI, effective position count, and top issuer-group exposure.
+- `reports/tables/Issuer Group Exposure Latest.csv`: latest issuer-group exposure by optimization mode.
+- `reports/tables/Latest Rank Diagnostic.csv`: latest predicted rank versus realized rank by ticker.
+- `reports/tables/Horizon Sample Disclosure.csv`: overlapping-window disclosure and approximate non-overlapping period counts.
 
 The dashboard page at `reports/dashboard.html` displays these diagnostics directly.
