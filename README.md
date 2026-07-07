@@ -14,7 +14,7 @@ The current project should be read as a reproducible VN30 research framework and
 
 Public dashboard:
 
-    https://nguyenhuygiabao.github.io/vn30-alpha-research/reports/dashboard.html
+    https://nguyenhuygiabao.github.io/vn30-alpha-research/reports/dashboard.htmlreports/dashboard.html
 
 Repository copy:
 
@@ -52,9 +52,14 @@ The project includes:
 
 ## Metric conventions
 
-- Decimal values in result tables are often percent-like units. Example: `-0.219472` means about `-21.95%`.
-- Rank IC and diagnostic Sharpe are unitless.
-- Final after-cost active return is a historical backtest metric, not a live-return claim.
+Return columns are stored as decimals in the source CSV files. For example, `0.001` means `0.10%`, and `-0.219472` means `-21.95%`.
+
+Dashboard and README tables display return-like values as percentages for readability.
+
+Rank IC and diagnostic Sharpe are unitless.
+
+Cumulative active-return sums are historical backtest diagnostics, not live portfolio returns or investment claims.
+
 
 ## Data
 
