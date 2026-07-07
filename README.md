@@ -14,7 +14,7 @@ The current project should be read as a reproducible VN30 research framework and
 
 Public dashboard:
 
-    https://nguyenhuygiabao.github.io/vn30-alpha-research/
+    https://nguyenhuygiabao.github.io/vn30-alpha-research/reports/dashboard.html
 
 Repository copy:
 
@@ -22,7 +22,7 @@ Repository copy:
 
 Quick terminal summary:
 
-    py .\scripts\Report Summary.py
+    py .\scripts\report_summary.py
 
 ## Method summary
 
@@ -149,32 +149,32 @@ Interpretation:
 Open these first:
 
 ```text
-reports/Final Results.md
+reports/final_results.md
 reports/methodology.md
-reports/Final Audit.md
+reports/final_audit.md
 ```
 
 Additional reports:
 
 ```text
-reports/Model Report.md
+reports/model_report.md
 reports/data_quality_report.md
 ```
 
 ## Tables
 
 ```text
-reports/tables/Ablation Results.csv
-reports/tables/Horizon Results.csv
+reports/tables/ablation_results.csv
+reports/tables/horizon_results.csv
 ```
 
 ## Figures
 
 ```text
-reports/figures/Top Gradient Boosting Feature Importance.png
-reports/figures/Ablation Diagnostic Sharpe.png
-reports/figures/Horizon Diagnostic Sharpe.png
-reports/figures/Horizon Rank Ic.png
+reports/figures/top_gradient_boosting_feature_importance.png
+reports/figures/ablation_diagnostic_sharpe.png
+reports/figures/horizon_diagnostic_sharpe.png
+reports/figures/horizon_rank_ic.png
 ```
 
 ## How to view outputs locally
@@ -182,9 +182,9 @@ reports/figures/Horizon Rank Ic.png
 Open reports in VS Code:
 
 ```powershell
-code .\reports\Final Results.md
+code .\reports\final_results.md
 code .\reports\methodology.md
-code .\reports\Final Audit.md
+code .\reports\final_audit.md
 ```
 
 Preview Markdown in VS Code:
@@ -210,7 +210,7 @@ explorer .\reports\tables
 The main local runner is:
 
 ```powershell
-py .\scripts\Run Full Pipeline.py
+py .\scripts\run_full_pipeline.py
 ```
 
 This runner refreshes outputs from existing local raw data only. It does not download or update live market data yet.
@@ -220,7 +220,7 @@ This runner refreshes outputs from existing local raw data only. It does not dow
 Use this when you want to rebuild generated outputs from existing raw data:
 
 ```powershell
-py .\scripts\Run Full Pipeline.py --clean-first --audit-after
+py .\scripts\run_full_pipeline.py --clean-first --audit-after
 ```
 
 ### Faster local refresh
@@ -228,7 +228,7 @@ py .\scripts\Run Full Pipeline.py --clean-first --audit-after
 Use this when you want to preserve expensive ML prediction caches and reuse them only when they are still fresh:
 
 ```powershell
-py .\scripts\Run Full Pipeline.py --clean-first --keep-expensive-ml --reuse-existing-ml --audit-after
+py .\scripts\run_full_pipeline.py --clean-first --keep-expensive-ml --reuse-existing-ml --audit-after
 ```
 
 Cache reuse is stale-aware. If features, labels, or relevant model source files change, the affected ML stages rerun automatically.
