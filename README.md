@@ -299,6 +299,18 @@ checked without replacing data from PowerShell:
 py .\scripts\run_daily_data_update.py --dry-run
 ```
 
+Preview the selected 10-day Gradient Boosting ranking from completed data:
+
+```powershell
+py .\scripts\score_daily_signals.py
+```
+
+The scorer rebuilds features and 10-day relative-return labels directly from the
+validated raw data. It fits only on dates whose complete forward outcome is known
+at the signal cutoff, then scores all 30 tickers on the latest completed date.
+It does not reuse historical backtest predictions. This command is a preview and
+does not write ledgers, construct target weights, or place orders.
+
 After the paper configuration and opening capital are finalized, initialize the
 local paper account once:
 
@@ -313,8 +325,8 @@ py .\scripts\reconcile_paper_account.py
 ```
 
 Generated paper-account CSV ledgers are local mutable state and are ignored by
-Git. No real orders are placed by these scripts. Latest-model scoring, the daily
-paper runner, and the monitoring dashboard remain future work.
+Git. No real orders are placed by these scripts. Target-weight construction, the
+daily paper runner, and the monitoring dashboard remain future work.
 
 ## Repository hygiene
 

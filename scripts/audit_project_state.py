@@ -42,6 +42,7 @@ KEY_FILES = [
     ROOT / "scripts" / "validate_paper_trading_timing.py",
     ROOT / "scripts" / "update_daily_data.py",
     ROOT / "scripts" / "run_daily_data_update.py",
+    ROOT / "scripts" / "score_daily_signals.py",
     ROOT / "run_daily_data_update.cmd",
     ROOT / "config" / "paper_trading_config.yaml",
 ]
