@@ -33,6 +33,8 @@ def validate_paper_trading_config(config: dict[str, Any]) -> None:
     account = _require_mapping(config, "account")
     timing = _require_mapping(config, "timing")
     market_calendar = _require_mapping(config, "market_calendar")
+    market_data = _require_mapping(config, "market_data")
+    data_update = _require_mapping(config, "data_update")
     portfolio = _require_mapping(config, "portfolio")
     execution = _require_mapping(config, "execution")
     settlement = _require_mapping(config, "settlement")
@@ -55,6 +57,20 @@ def validate_paper_trading_config(config: dict[str, Any]) -> None:
         },
     )
     _require_keys(market_calendar, "market_calendar", {"holiday_dates"})
+    _require_keys(market_data, "market_data", {"price_multiplier_to_vnd"})
+    _require_keys(
+        data_update,
+        "data_update",
+        {
+            "source",
+            "overlap_calendar_days",
+            "request_interval_seconds",
+            "max_attempts",
+            "overlap_close_tolerance",
+            "suspicious_return_threshold",
+            "audit_path",
+        },
+    )
     _require_keys(
         portfolio,
         "portfolio",
@@ -137,6 +153,28 @@ def validate_paper_trading_config(config: dict[str, Any]) -> None:
 
     if len(normalized_holidays) != len(set(normalized_holidays)):
         raise ValueError("holiday_dates cannot contain duplicates")
+
+    if market_data["price_multiplier_to_vnd"] <= 0:
+        raise ValueError("price_multiplier_to_vnd must be positive")
+
+    if not str(data_update["source"]).strip():
+        raise ValueError("data_update source cannot be empty")
+
+    if data_update["overlap_calendar_days"] < 2:
+        raise ValueError("overlap_calendar_days must be at least 2")
+
+    if data_update["request_interval_seconds"] < 0:
+        raise ValueError("request_interval_seconds cannot be negative")
+
+    if data_update["max_attempts"] < 1:
+        raise ValueError("max_attempts must be at least 1")
+
+    for name in ("overlap_close_tolerance", "suspicious_return_threshold"):
+        if not 0 < data_update[name] < 1:
+            raise ValueError(f"{name} must be between 0 and 1")
+
+    if not str(data_update["audit_path"]).strip():
+        raise ValueError("data_update audit_path cannot be empty")
 
     target_holdings = portfolio["target_holdings"]
     invested_weight = portfolio["target_invested_weight"]

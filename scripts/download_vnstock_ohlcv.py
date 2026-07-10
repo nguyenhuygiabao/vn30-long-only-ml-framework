@@ -11,7 +11,7 @@ UNIVERSE_PATH: str = "config/vn30_universe.csv"
 OUTPUT_PATH: str = "data/raw/vnstock/vn30_ohlcv.csv"
 AUDIT_PATH: str = "data/raw/vnstock/vn30_coverage_audit.csv"
 
-SOURCE: str = "kbs"
+SOURCE: str = "KBS"
 START_DATE: str = "2020-01-01"
 END_DATE: str = "2026-06-30"
 SLEEP_SECONDS: int = 4
@@ -101,10 +101,9 @@ def download_one_symbol(
     )
 
     data = quote.history(
-        symbol=vnstock_symbol,
         start=START_DATE,
         end=END_DATE,
-        interval="1D",
+        interval="d",
     )
 
     if data.empty:

@@ -18,6 +18,18 @@ timing:
 market_calendar:
   holiday_dates: []
 
+market_data:
+  price_multiplier_to_vnd: 1000
+
+data_update:
+  source: KBS
+  overlap_calendar_days: 14
+  request_interval_seconds: 4
+  max_attempts: 3
+  overlap_close_tolerance: 0.05
+  suspicious_return_threshold: 0.15
+  audit_path: data/raw/vnstock/daily_update_audit.csv
+
 portfolio:
   target_holdings: 7
   target_invested_weight: 0.97

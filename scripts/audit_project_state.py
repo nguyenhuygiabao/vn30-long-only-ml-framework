@@ -40,6 +40,7 @@ KEY_FILES = [
     ROOT / "scripts" / "initialize_paper_account.py",
     ROOT / "scripts" / "reconcile_paper_account.py",
     ROOT / "scripts" / "validate_paper_trading_timing.py",
+    ROOT / "scripts" / "update_daily_data.py",
     ROOT / "config" / "paper_trading_config.yaml",
 ]
 

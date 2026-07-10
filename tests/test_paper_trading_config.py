@@ -60,3 +60,19 @@ def test_duplicate_market_holidays_are_rejected() -> None:
 
     with pytest.raises(ValueError, match="cannot contain duplicates"):
         validate_paper_trading_config(config)
+
+
+def test_invalid_data_update_tolerance_is_rejected() -> None:
+    config = deepcopy(load_paper_trading_config())
+    config["data_update"]["overlap_close_tolerance"] = 1.5
+
+    with pytest.raises(ValueError, match="overlap_close_tolerance"):
+        validate_paper_trading_config(config)
+
+
+def test_invalid_price_multiplier_is_rejected() -> None:
+    config = deepcopy(load_paper_trading_config())
+    config["market_data"]["price_multiplier_to_vnd"] = 0
+
+    with pytest.raises(ValueError, match="price_multiplier_to_vnd"):
+        validate_paper_trading_config(config)

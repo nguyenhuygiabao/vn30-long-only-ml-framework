@@ -261,6 +261,24 @@ Validate that the latest OHLCV file represents a completed market day:
 py .\scripts\validate_paper_trading_timing.py
 ```
 
+Safely download and validate an incremental daily update without replacing the
+current raw file:
+
+```powershell
+py .\scripts\update_daily_data.py --dry-run
+```
+
+After the dry run passes, replace the local raw file with the validated update:
+
+```powershell
+py .\scripts\update_daily_data.py
+```
+
+The updater must run after the configured market-data cutoff. It downloads an
+overlapping window, verifies provider continuity, requires full latest-date
+universe coverage, rejects future or malformed rows, and stages the output before
+replacing the existing CSV.
+
 After the paper configuration and opening capital are finalized, initialize the
 local paper account once:
 
@@ -275,8 +293,8 @@ py .\scripts\reconcile_paper_account.py
 ```
 
 Generated paper-account CSV ledgers are local mutable state and are ignored by
-Git. No real orders are placed by these scripts. The automated daily data update,
-latest-model scoring, daily runner, and monitoring dashboard remain future work.
+Git. No real orders are placed by these scripts. Latest-model scoring, the daily
+paper runner, and the monitoring dashboard remain future work.
 
 ## Repository hygiene
 
