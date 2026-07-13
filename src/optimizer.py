@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from pathlib import Path
 
 import pandas as pd
+
+from src.paper_trading.targets import build_constrained_target_weights
 
 
 TREE_MODEL_PREDICTIONS_PATH: str = "data/processed/tree_model_predictions.parquet"
@@ -21,6 +24,12 @@ MAX_ISSUER_GROUP_WEIGHT: float = 0.40
 ISSUER_GROUP_COLUMN: str = "issuer_group"
 SECTOR_COLUMN: str = "sector"
 MAX_SECTOR_WEIGHT: float = 0.35
+PAPER_TARGET_HOLDINGS: int = 8
+PAPER_TARGET_EXPOSURE: float = 0.97
+PAPER_MAX_SINGLE_NAME_WEIGHT: float = 0.15
+PAPER_MAX_ISSUER_GROUP_WEIGHT: float = 0.25
+PAPER_MAX_SECTOR_WEIGHT: float = 0.35
+PAPER_MAX_TURNOVER: float = 0.25
 HERDING_SCORE_COLUMN: str = "herding_corr_score"
 HIGH_HERDING_THRESHOLD: float = 0.80
 HERDING_AWARE_TOP_N: int = 5
@@ -220,6 +229,73 @@ def apply_sector_cap(
 
     return capped
 
+
+def build_sector_diversified_targets_for_date(
+    date_predictions: pd.DataFrame,
+) -> pd.DataFrame:
+    """Build a paper-like target using rank replacements rather than cash scaling.
+
+    This historical comparison mirrors the daily paper target construction: when
+    highly ranked names are concentrated in one issuer family or risk sector,
+    lower-ranked eligible names replace them so the target can remain invested.
+    """
+    required_columns = {
+        "date",
+        "ticker",
+        "predicted_return",
+        ISSUER_GROUP_COLUMN,
+        SECTOR_COLUMN,
+    }
+    missing_columns = sorted(required_columns.difference(date_predictions.columns))
+
+    if missing_columns:
+        raise ValueError(
+            "Sector-diversified targets are missing columns: "
+            f"{missing_columns}"
+        )
+
+    ranked = date_predictions.copy()
+    ranked["model_name"] = ranked.get("model_name", "historical")
+    ranked["score"] = ranked["predicted_return"]
+    ranked = ranked.sort_values(
+        ["score", "ticker"], ascending=[False, True]
+    ).reset_index(drop=True)
+    ranked["predicted_rank"] = range(1, len(ranked) + 1)
+    ranked["horizon_days"] = ranked.get("horizon_days", 10)
+
+    result = build_constrained_target_weights(
+        predictions=ranked[
+            [
+                "date",
+                "ticker",
+                "model_name",
+                "horizon_days",
+                "score",
+                "predicted_rank",
+            ]
+        ],
+        universe=ranked[["ticker", ISSUER_GROUP_COLUMN, SECTOR_COLUMN]],
+        target_holdings=PAPER_TARGET_HOLDINGS,
+        target_invested_weight=Decimal(str(PAPER_TARGET_EXPOSURE)),
+        max_single_name_weight=Decimal(str(PAPER_MAX_SINGLE_NAME_WEIGHT)),
+        max_issuer_group_weight=Decimal(str(PAPER_MAX_ISSUER_GROUP_WEIGHT)),
+        max_sector_weight=Decimal(str(PAPER_MAX_SECTOR_WEIGHT)),
+    )
+    targets = result.target_weights.copy()
+    targets["target_weight"] = targets["target_weight"].astype(float)
+    targets = targets.rename(columns={"score": "predicted_return"})
+
+    return targets[
+        [
+            "date",
+            "ticker",
+            ISSUER_GROUP_COLUMN,
+            SECTOR_COLUMN,
+            "predicted_return",
+            "target_weight",
+        ]
+    ]
+
 def calculate_turnover(
     old_weights: pd.Series,
     new_weights: pd.Series,
@@ -320,21 +396,28 @@ def build_optimized_weights(
             date_target_exposure = 1.0
             date_min_predicted_return = None
 
-        target_frame = build_target_weights_for_date(
-            date_predictions=date_predictions,
-            top_n=date_top_n,
-            max_weight=date_max_weight,
-            target_exposure=date_target_exposure,
-            min_predicted_return=date_min_predicted_return,
-            max_sector_weight=max_sector_weight,
-        )
+        if optimization_mode == "sector_diversified":
+            target_frame = build_sector_diversified_targets_for_date(
+                date_predictions
+            )
+            date_max_turnover = PAPER_MAX_TURNOVER
+        else:
+            target_frame = build_target_weights_for_date(
+                date_predictions=date_predictions,
+                top_n=date_top_n,
+                max_weight=date_max_weight,
+                target_exposure=date_target_exposure,
+                min_predicted_return=date_min_predicted_return,
+                max_sector_weight=max_sector_weight,
+            )
+            date_max_turnover = max_turnover
 
         target_weights = target_frame.set_index("ticker")["target_weight"]
 
         optimized_weights = apply_turnover_cap(
             previous_weights=previous_weights,
             target_weights=target_weights,
-            max_turnover=max_turnover,
+            max_turnover=date_max_turnover,
         )
 
         output = (
@@ -448,11 +531,17 @@ def main() -> None:
         optimization_mode="sector_aware",
     )
 
+    sector_diversified_weights = build_optimized_weights(
+        predictions=predictions,
+        optimization_mode="sector_diversified",
+    )
+
     weights = pd.concat(
         [
             normal_weights,
             herding_aware_weights,
             sector_aware_weights,
+            sector_diversified_weights,
         ],
         ignore_index=True,
     )

@@ -94,12 +94,12 @@ def main() -> None:
     issuer_group_complete = weights[ISSUER_GROUP_COLUMN].notna().all()
     sector_complete = weights[SECTOR_COLUMN].notna().all()
 
-    sector_aware_weights = daily_sector_weight.loc[
+    sector_constrained_weights = daily_sector_weight.loc[
         daily_sector_weight.index.get_level_values("optimization_mode")
-        == "sector_aware"
+        .isin(["sector_aware", "sector_diversified"])
     ]
     sector_cap_respected = (
-        sector_aware_weights.max() <= MAX_SECTOR_WEIGHT + TOLERANCE
+        sector_constrained_weights.max() <= MAX_SECTOR_WEIGHT + TOLERANCE
     )
 
     weight_sum_respected = daily_weight_sum.max() <= 1.0 + TOLERANCE
@@ -167,6 +167,7 @@ def main() -> None:
         "normal",
         "herding_aware",
         "sector_aware",
+        "sector_diversified",
     }
 
     daily_mode_summary = (
@@ -255,7 +256,7 @@ def main() -> None:
     print("Issuer group complete:", issuer_group_complete)
     print("Sector complete:", sector_complete)
     print("Issuer group cap respected:", issuer_group_cap_respected)
-    print("Sector-aware cap respected:", sector_cap_respected)
+    print("Sector-constrained cap respected:", sector_cap_respected)
     print("Expected optimization modes present:", expected_optimization_modes_present)
     print("Herding-aware reduces exposure:", herding_aware_reduces_exposure)
     print("Herding-aware reduces max weight:", herding_aware_reduces_max_weight)
