@@ -9,6 +9,7 @@ import pytest
 
 from src.paper_trading.schemas import LEDGER_SCHEMAS
 from src.paper_trading.scoring import (
+    RANK_ENSEMBLE_MODEL_NAME,
     DailyScoringResult,
     build_signal_ledger_rows,
     score_completed_market_data,
@@ -109,6 +110,24 @@ def test_completed_market_data_builds_10_day_labels_and_scores() -> None:
     assert result.training_date_count == 70
     assert len(result.predictions) == 3
     assert np.isfinite(result.predictions["score"]).all()
+
+
+def test_rank_ensemble_scores_without_leaking_signal_date_target() -> None:
+    result = score_latest_modeling_dataset(
+        modeling_dataset=modeling_dataset(),
+        expected_tickers=TICKERS,
+        horizon_days=2,
+        model_name=RANK_ENSEMBLE_MODEL_NAME,
+        minimum_training_dates=3,
+    )
+
+    assert set(result.predictions["model_name"]) == {RANK_ENSEMBLE_MODEL_NAME}
+    assert result.predictions["predicted_rank"].tolist() == [1, 2, 3]
+    assert np.isfinite(result.predictions["score"]).all()
+    assert set(result.feature_importance["model_name"]) == {
+        "gradient_boosting",
+        "random_forest",
+    }
 
 
 def test_signal_date_known_target_is_rejected_as_possible_leakage() -> None:

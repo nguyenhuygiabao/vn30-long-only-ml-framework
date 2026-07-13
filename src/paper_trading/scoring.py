@@ -26,6 +26,11 @@ HORIZON_TARGET_COLUMNS: dict[int, str] = {
     5: "forward_relative_return_5d",
     10: "forward_relative_return_10d",
 }
+RANK_ENSEMBLE_MODEL_NAME = "rank_ensemble"
+DEFAULT_RANK_ENSEMBLE_MEMBERS: tuple[str, ...] = (
+    "gradient_boosting",
+    "random_forest",
+)
 
 
 @dataclass(frozen=True)
@@ -75,6 +80,31 @@ def _normalized_expected_tickers(
         raise ValueError("Expected ticker universe cannot be empty")
 
     return tickers
+
+
+def _rank_ensemble_scores(
+    member_scores: dict[str, np.ndarray],
+) -> np.ndarray:
+    if not member_scores:
+        raise ValueError("Rank ensemble requires at least one member model")
+
+    lengths = {len(scores) for scores in member_scores.values()}
+
+    if len(lengths) != 1:
+        raise ValueError("Rank ensemble member predictions have inconsistent lengths")
+
+    ranked_scores = []
+
+    for model_name, scores in member_scores.items():
+        if not np.isfinite(scores).all():
+            raise ValueError(f"Rank ensemble member {model_name} produced non-finite scores")
+
+        ranked_scores.append(
+            pd.Series(scores).rank(method="first", ascending=False).to_numpy()
+        )
+
+    mean_rank = np.mean(ranked_scores, axis=0)
+    return 1.0 - mean_rank / (len(mean_rank) + 1.0)
 
 
 def score_latest_modeling_dataset(
@@ -161,17 +191,36 @@ def score_latest_modeling_dataset(
 
     models = create_tree_models()
 
-    if model_name not in models:
+    if model_name == RANK_ENSEMBLE_MODEL_NAME:
+        ensemble_members = DEFAULT_RANK_ENSEMBLE_MEMBERS
+    elif model_name in models:
+        ensemble_members = (model_name,)
+    else:
         raise ValueError(f"Unsupported daily scoring model: {model_name}")
 
-    prediction_series, fitted_pipeline = fit_predict_tree_model(
-        model=models[model_name],
-        x_train=training_rows[feature_columns],
-        y_train=training_rows[TARGET_COLUMN],
-        x_test=signal_rows[feature_columns],
-    )
+    member_scores: dict[str, np.ndarray] = {}
+    importance_frames: list[pd.DataFrame] = []
 
-    scores = np.asarray(prediction_series, dtype=float)
+    for member_name in ensemble_members:
+        prediction_series, fitted_pipeline = fit_predict_tree_model(
+            model=models[member_name],
+            x_train=training_rows[feature_columns],
+            y_train=training_rows[TARGET_COLUMN],
+            x_test=signal_rows[feature_columns],
+        )
+        member_scores[member_name] = np.asarray(prediction_series, dtype=float)
+        importance = extract_feature_importance(
+            fitted_pipeline=fitted_pipeline,
+            feature_columns=feature_columns,
+            model_name=member_name,
+        )
+        importance_frames.append(importance)
+
+    scores = (
+        _rank_ensemble_scores(member_scores)
+        if model_name == RANK_ENSEMBLE_MODEL_NAME
+        else member_scores[model_name]
+    )
 
     if not np.isfinite(scores).all():
         raise ValueError("Daily model produced non-finite prediction scores")
@@ -195,11 +244,7 @@ def score_latest_modeling_dataset(
             "predicted_rank",
         ]
     ]
-    feature_importance = extract_feature_importance(
-        fitted_pipeline=fitted_pipeline,
-        feature_columns=feature_columns,
-        model_name=model_name,
-    )
+    feature_importance = pd.concat(importance_frames, ignore_index=True)
 
     return DailyScoringResult(
         signal_date=signal_timestamp.date(),
