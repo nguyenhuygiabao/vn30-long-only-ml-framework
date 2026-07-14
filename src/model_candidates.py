@@ -17,6 +17,11 @@ REQUIRED_COLUMNS = {
     "actual_return",
 }
 REQUIRED_MARKET_COLUMNS = {"date", "ticker", "adjusted_close"}
+DEFAULT_REGIME_POLICY = {
+    "trend_up": "random_forest",
+    "high_volatility": "random_forest",
+    "trend_down": "cash",
+}
 
 
 def build_rank_ensemble_history(
@@ -292,3 +297,92 @@ def summarize_candidates_by_market_regime(
         .reset_index(drop=True)
     )
     return summary
+
+
+def evaluate_regime_policy(
+    predictions: pd.DataFrame,
+    market_data: pd.DataFrame,
+    policy: dict[str, str] | None = None,
+    top_n: int = 8,
+    return_window: int = 20,
+    volatility_baseline_window: int = 126,
+) -> pd.DataFrame:
+    """Evaluate a fixed, observable-regime model-selection policy historically.
+
+    This is a diagnostic on overlapping forward-return labels, not a live trading
+    backtest.  A ``cash`` selection contributes a zero top-N return and has no
+    rank IC because no stocks are selected.
+    """
+    selected_models = dict(DEFAULT_REGIME_POLICY if policy is None else policy)
+    expected_regimes = {"trend_up", "trend_down", "high_volatility"}
+    missing_regimes = sorted(expected_regimes.difference(selected_models))
+    if missing_regimes:
+        raise ValueError(f"Regime policy is missing selections: {missing_regimes}")
+
+    daily = build_daily_candidate_metrics(predictions, top_n=top_n)
+    regimes = build_historical_market_regimes(
+        market_data,
+        return_window=return_window,
+        volatility_baseline_window=volatility_baseline_window,
+    )
+    available = set(daily["model_name"])
+    invalid_models = sorted(
+        {
+            model_name
+            for model_name in selected_models.values()
+            if model_name != "cash" and model_name not in available
+        }
+    )
+    if invalid_models:
+        raise ValueError(f"Regime policy selects unavailable models: {invalid_models}")
+
+    prediction_dates = daily[["date"]].drop_duplicates()
+    selected = regimes[["date", "market_regime"]].merge(
+        prediction_dates,
+        on="date",
+        how="inner",
+        validate="one_to_one",
+    )
+    if selected.empty:
+        raise ValueError("No prediction dates overlap the available market regimes")
+    selected["selected_model"] = selected["market_regime"].map(selected_models)
+    model_metrics = daily.rename(columns={"model_name": "selected_model"})
+    invested = selected.loc[selected["selected_model"] != "cash"].merge(
+        model_metrics,
+        on=["date", "selected_model"],
+        how="left",
+        validate="one_to_one",
+    )
+    if invested[["rank_ic", "top_n_actual_return"]].isna().any().any():
+        raise ValueError("Policy selections lack matched daily model metrics")
+
+    cash = selected.loc[selected["selected_model"] == "cash"].assign(
+        rank_ic=np.nan,
+        top_n_actual_return=0.0,
+    )
+    combined = pd.concat([invested, cash], ignore_index=True)
+    return combined.sort_values("date").reset_index(drop=True)
+
+
+def summarize_regime_policy(policy_history: pd.DataFrame) -> pd.DataFrame:
+    """Return descriptive diagnostics for a regime-policy history."""
+    required = {"date", "selected_model", "top_n_actual_return"}
+    missing = sorted(required.difference(policy_history.columns))
+    if missing:
+        raise ValueError(f"Policy history is missing columns: {missing}")
+    if policy_history.empty:
+        raise ValueError("Policy history is empty")
+
+    returns = policy_history["top_n_actual_return"]
+    return pd.DataFrame(
+        [
+            {
+                "evaluated_dates": policy_history["date"].nunique(),
+                "invested_dates": int((policy_history["selected_model"] != "cash").sum()),
+                "cash_dates": int((policy_history["selected_model"] == "cash").sum()),
+                "average_top_n_actual_return": returns.mean(),
+                "top_n_return_volatility": returns.std(),
+                "cumulative_top_n_actual_return": (1.0 + returns).prod() - 1.0,
+            }
+        ]
+    )

@@ -3,10 +3,13 @@ from __future__ import annotations
 import pandas as pd
 
 from src.model_candidates import (
+    DEFAULT_REGIME_POLICY,
     RANK_ENSEMBLE_MODEL_NAME,
     build_rank_ensemble_history,
     build_historical_market_regimes,
     summarize_candidates_by_market_regime,
+    evaluate_regime_policy,
+    summarize_regime_policy,
     summarize_model_candidates,
     summarize_paired_candidate_stability,
 )
@@ -118,3 +121,43 @@ def test_market_regimes_are_historical_and_candidate_summary_is_joined() -> None
         RANK_ENSEMBLE_MODEL_NAME,
     }
     assert (summary["evaluated_dates"] > 0).all()
+
+
+def test_regime_policy_can_hold_cash_in_downtrends() -> None:
+    data = market_data()
+    data = data.sort_values(["ticker", "date"]).copy()
+    data["adjusted_close"] = data.groupby("ticker").cumcount().map(
+        lambda index: 100.0 * 0.99**index
+    )
+    prediction_dates = pd.bdate_range("2025-06-02", periods=40)
+    rows = []
+    for market_date in prediction_dates:
+        for model_name, scores in {
+            "gradient_boosting": [0.3, 0.2, 0.1],
+            "random_forest": [0.2, 0.3, 0.1],
+        }.items():
+            for ticker, score, actual in zip(
+                ["AAA", "BBB", "CCC"], scores, [0.04, 0.02, -0.01]
+            ):
+                rows.append(
+                    {
+                        "date": market_date,
+                        "ticker": ticker,
+                        "model_name": model_name,
+                        "predicted_return": score,
+                        "actual_return": actual,
+                    }
+                )
+    history = evaluate_regime_policy(
+        pd.DataFrame(rows),
+        data,
+        top_n=2,
+        return_window=5,
+        volatility_baseline_window=10,
+    )
+    summary = summarize_regime_policy(history)
+
+    assert DEFAULT_REGIME_POLICY["trend_down"] == "cash"
+    assert (history["selected_model"] == "cash").any()
+    assert (history.loc[history["selected_model"] == "cash", "top_n_actual_return"] == 0.0).all()
+    assert summary.loc[0, "cash_dates"] > 0
