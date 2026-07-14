@@ -9,6 +9,7 @@ from src.model_candidates import (
     DEFAULT_REGIME_POLICY,
     build_historical_market_regimes,
     build_rank_ensemble_history,
+    paired_block_bootstrap_mean_difference,
 )
 
 
@@ -37,6 +38,40 @@ def _apply_turnover_cap(
     return adjusted[adjusted > 1e-12]
 
 
+def build_market_drawdown_overlay(
+    market_data: pd.DataFrame,
+    trigger_drawdown: float = -0.10,
+    reduced_exposure: float = 0.50,
+    normal_exposure: float = 0.97,
+) -> pd.DataFrame:
+    """Create an observable equal-weight market drawdown exposure overlay."""
+    if not -1.0 < trigger_drawdown < 0.0:
+        raise ValueError("trigger_drawdown must be between -1 and 0")
+    if not 0.0 <= reduced_exposure <= normal_exposure <= 1.0:
+        raise ValueError("Exposure inputs must satisfy 0 <= reduced <= normal <= 1")
+    required = {"date", "ticker", "adjusted_close"}
+    missing = sorted(required.difference(market_data.columns))
+    if missing:
+        raise ValueError(f"Market data are missing columns: {missing}")
+
+    prices = market_data[["date", "ticker", "adjusted_close"]].copy()
+    prices["date"] = pd.to_datetime(prices["date"], errors="raise")
+    prices["ticker"] = prices["ticker"].astype(str).str.strip().str.upper()
+    prices = prices.sort_values(["ticker", "date"])
+    prices["stock_return"] = prices.groupby("ticker")["adjusted_close"].pct_change()
+    overlay = prices.groupby("date", as_index=False)["stock_return"].mean()
+    overlay["market_return"] = overlay.pop("stock_return").fillna(0.0)
+    overlay["market_nav"] = (1.0 + overlay["market_return"]).cumprod()
+    overlay["market_drawdown"] = overlay["market_nav"] / overlay["market_nav"].cummax() - 1.0
+    overlay["risk_off"] = overlay["market_drawdown"] <= trigger_drawdown
+    overlay["target_exposure"] = np.where(
+        overlay["risk_off"], reduced_exposure, normal_exposure
+    )
+    return overlay[
+        ["date", "market_drawdown", "risk_off", "target_exposure"]
+    ].reset_index(drop=True)
+
+
 def build_non_overlapping_policy_returns(
     predictions: pd.DataFrame,
     market_data: pd.DataFrame,
@@ -49,6 +84,7 @@ def build_non_overlapping_policy_returns(
     commission_rate: float = 0.001,
     slippage_rate: float = 0.001,
     sell_tax_rate: float = 0.001,
+    target_exposure_by_date: pd.Series | None = None,
 ) -> pd.DataFrame:
     """Backtest a fixed regime policy on non-overlapping forward-return labels.
 
@@ -61,6 +97,16 @@ def build_non_overlapping_policy_returns(
         raise ValueError("top_n and holding_period_days must be positive")
     if not 0.0 <= target_exposure <= 1.0 or not 0.0 < max_turnover <= 1.0:
         raise ValueError("Exposure and turnover inputs are outside valid bounds")
+    if target_exposure_by_date is not None:
+        target_exposure_by_date = target_exposure_by_date.copy()
+        target_exposure_by_date.index = pd.to_datetime(
+            target_exposure_by_date.index,
+            errors="raise",
+        )
+        if target_exposure_by_date.index.has_duplicates:
+            raise ValueError("Exposure overlay has duplicate dates")
+        if ((target_exposure_by_date < 0.0) | (target_exposure_by_date > 1.0)).any():
+            raise ValueError("Exposure overlay values must be between 0 and 1")
 
     policy_map = dict(DEFAULT_REGIME_POLICY if policy is None else policy)
     expected_regimes = {"trend_up", "trend_down", "high_volatility"}
@@ -107,6 +153,11 @@ def build_non_overlapping_policy_returns(
     for schedule_row in schedule.itertuples(index=False):
         date = schedule_row.date
         selected_model = schedule_row.selected_model
+        date_target_exposure = target_exposure
+        if target_exposure_by_date is not None:
+            if date not in target_exposure_by_date.index:
+                raise ValueError(f"Exposure overlay lacks date {date}")
+            date_target_exposure = float(target_exposure_by_date.loc[date])
         daily_actual_returns = (
             combined.loc[combined["date"] == date]
             .groupby("ticker")["actual_return"]
@@ -127,7 +178,7 @@ def build_non_overlapping_policy_returns(
             if len(daily) < top_n:
                 raise ValueError(f"Insufficient predictions for {selected_model} on {date}")
             target = pd.Series(
-                target_exposure / top_n,
+                date_target_exposure / top_n,
                 index=daily["ticker"],
                 dtype=float,
             )
@@ -165,6 +216,7 @@ def build_non_overlapping_policy_returns(
                 "portfolio_turnover": turnover,
                 "total_weight": float(weights.sum()),
                 "selected_count": len(weights),
+                "target_exposure": date_target_exposure,
                 "forced_exit_weight": forced_exit_weight,
                 "turnover_cap_breached_by_forced_exit": (
                     turnover > max_turnover + 1e-12
@@ -182,23 +234,89 @@ def build_non_overlapping_policy_returns(
 def summarize_non_overlapping_policy_returns(history: pd.DataFrame) -> pd.DataFrame:
     if history.empty:
         raise ValueError("Policy backtest history is empty")
-    returns = history["after_cost_return"]
+    ordered = history.sort_values("date").reset_index(drop=True)
+    returns = ordered["after_cost_return"]
     volatility = returns.std()
+    cumulative = (1.0 + returns).cumprod() - 1.0
+    drawdown = (1.0 + cumulative) / (1.0 + cumulative).cummax() - 1.0
     return pd.DataFrame(
         [
             {
-                "rebalance_dates": history["date"].nunique(),
+                "rebalance_dates": ordered["date"].nunique(),
                 "average_after_cost_return": returns.mean(),
                 "return_volatility": volatility,
                 "diagnostic_sharpe": returns.mean() / volatility if volatility else np.nan,
-                "average_turnover": history["portfolio_turnover"].mean(),
-                "maximum_turnover": history["portfolio_turnover"].max(),
-                "forced_exit_dates": int((history["forced_exit_weight"] > 0.0).sum()),
-                "maximum_forced_exit_weight": history["forced_exit_weight"].max(),
-                "final_cumulative_after_cost_return": history[
-                    "cumulative_after_cost_return"
-                ].iloc[-1],
-                "settlement_compatible": bool(history["settlement_compatible"].all()),
+                "average_turnover": ordered["portfolio_turnover"].mean(),
+                "maximum_turnover": ordered["portfolio_turnover"].max(),
+                "average_target_exposure": ordered["target_exposure"].mean(),
+                "minimum_target_exposure": ordered["target_exposure"].min(),
+                "forced_exit_dates": int((ordered["forced_exit_weight"] > 0.0).sum()),
+                "maximum_forced_exit_weight": ordered["forced_exit_weight"].max(),
+                "final_cumulative_after_cost_return": cumulative.iloc[-1],
+                "max_after_cost_drawdown": drawdown.min(),
+                "settlement_compatible": bool(ordered["settlement_compatible"].all()),
+            }
+        ]
+    )
+
+
+def build_paired_overlay_returns(
+    baseline_history: pd.DataFrame,
+    overlay_history: pd.DataFrame,
+) -> pd.DataFrame:
+    """Align two non-overlapping histories for a like-for-like overlay test."""
+    required = {"date", "after_cost_return"}
+    for name, history in (("baseline", baseline_history), ("overlay", overlay_history)):
+        missing = sorted(required.difference(history.columns))
+        if missing:
+            raise ValueError(f"{name} history is missing columns: {missing}")
+
+    baseline = baseline_history[["date", "after_cost_return"]].rename(
+        columns={"after_cost_return": "baseline_after_cost_return"}
+    )
+    overlay = overlay_history[["date", "after_cost_return"]].rename(
+        columns={"after_cost_return": "overlay_after_cost_return"}
+    )
+    paired = baseline.merge(overlay, on="date", how="inner", validate="one_to_one")
+    if len(paired) < 2:
+        raise ValueError("At least two matched rebalance dates are required")
+    paired["after_cost_return_difference"] = (
+        paired["overlay_after_cost_return"] - paired["baseline_after_cost_return"]
+    )
+    return paired.sort_values("date").reset_index(drop=True)
+
+
+def summarize_paired_overlay_stability(
+    paired_returns: pd.DataFrame,
+    block_size: int = 5,
+    bootstrap_samples: int = 2_000,
+) -> pd.DataFrame:
+    """Summarize the overlay's paired return difference and block-bootstrap CI."""
+    required = {"date", "after_cost_return_difference"}
+    missing = sorted(required.difference(paired_returns.columns))
+    if missing:
+        raise ValueError(f"Paired returns are missing columns: {missing}")
+
+    differences = paired_returns["after_cost_return_difference"]
+    mean_difference, lower, upper = paired_block_bootstrap_mean_difference(
+        differences,
+        block_size=block_size,
+        bootstrap_samples=bootstrap_samples,
+    )
+    years = pd.to_datetime(paired_returns["date"]).dt.year
+    yearly = pd.DataFrame({"year": years, "difference": differences}).groupby("year")[
+        "difference"
+    ].mean()
+    return pd.DataFrame(
+        [
+            {
+                "paired_rebalance_dates": len(paired_returns),
+                "mean_after_cost_return_difference": mean_difference,
+                "bootstrap_95pct_lower": lower,
+                "bootstrap_95pct_upper": upper,
+                "positive_rebalance_dates": int((differences > 0.0).sum()),
+                "positive_years": int((yearly > 0.0).sum()),
+                "available_years": len(yearly),
             }
         ]
     )

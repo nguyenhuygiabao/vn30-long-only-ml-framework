@@ -3,7 +3,10 @@ from __future__ import annotations
 import pandas as pd
 
 from src.regime_policy_backtest import (
+    build_market_drawdown_overlay,
     build_non_overlapping_policy_returns,
+    build_paired_overlay_returns,
+    summarize_paired_overlay_stability,
     summarize_non_overlapping_policy_returns,
 )
 
@@ -111,3 +114,48 @@ def test_non_overlapping_policy_forces_exit_when_held_ticker_disappears() -> Non
     exit_row = history.loc[history["date"] == second_date].iloc[0]
     assert exit_row["forced_exit_weight"] > 0.0
     assert pd.notna(exit_row["after_cost_return"])
+
+
+def test_drawdown_overlay_reduces_exposure_without_using_future_prices() -> None:
+    falling = market_data().copy()
+    falling["adjusted_close"] = falling.groupby("ticker").cumcount().map(
+        lambda index: 100.0 * 0.99**index
+    )
+    overlay = build_market_drawdown_overlay(
+        falling,
+        trigger_drawdown=-0.10,
+        reduced_exposure=0.50,
+    )
+    history = build_non_overlapping_policy_returns(
+        predictions(),
+        falling,
+        top_n=2,
+        holding_period_days=10,
+        target_exposure_by_date=overlay.set_index("date")["target_exposure"],
+    )
+
+    assert overlay["risk_off"].any()
+    assert (overlay.loc[overlay["risk_off"], "target_exposure"] == 0.50).all()
+    assert history["target_exposure"].min() == 0.50
+
+
+def test_paired_overlay_stability_uses_matched_rebalance_dates() -> None:
+    baseline = pd.DataFrame(
+        {
+            "date": pd.bdate_range("2025-01-01", periods=8),
+            "after_cost_return": [0.001] * 8,
+        }
+    )
+    guarded = baseline.copy()
+    guarded["after_cost_return"] = [0.002, 0.001, 0.003, 0.001, 0.002, 0.002, 0.001, 0.003]
+    paired = build_paired_overlay_returns(baseline, guarded)
+    summary = summarize_paired_overlay_stability(
+        paired,
+        block_size=2,
+        bootstrap_samples=100,
+    )
+
+    assert len(paired) == 8
+    assert (paired["after_cost_return_difference"] >= 0.0).all()
+    assert summary.loc[0, "positive_rebalance_dates"] == 5
+    assert summary.loc[0, "bootstrap_95pct_lower"] >= 0.0
