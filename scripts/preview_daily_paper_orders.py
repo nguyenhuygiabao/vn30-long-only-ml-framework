@@ -21,7 +21,11 @@ from src.paper_trading.market_data import (
     validate_completed_market_data,
 )
 from src.paper_trading.order_sizing import TargetWeight, build_order_plan
-from src.paper_trading.scoring import score_completed_market_data
+from src.paper_trading.plan_recording import record_daily_paper_plan
+from src.paper_trading.scoring import (
+    build_signal_ledger_rows,
+    score_completed_market_data,
+)
 from src.paper_trading.storage import PaperAccountStorage
 from src.paper_trading.targets import build_constrained_target_weights
 from src.price_limit import add_estimated_price_limits
@@ -39,6 +43,11 @@ def parse_args():
         "--model",
         default="rank_ensemble",
         choices=["gradient_boosting", "random_forest", "rank_ensemble"],
+    )
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="Persist the validated plan to local paper ledgers.",
     )
     return parser.parse_args()
 
@@ -198,8 +207,61 @@ def main():
         print("\nSkipped/deferred reasons:")
         print(reasons.to_string())
 
-    print()
-    print("Preview only. No ledger rows or real orders were written.")
+    if args.write:
+        signal_rows = build_signal_ledger_rows(
+            result=scoring,
+            data_asof_date=validation.timing.data_asof_date,
+            intended_execution_date=(
+                validation.timing.intended_execution_date
+            ),
+            created_at=generated_at,
+        )
+
+        portfolio_id = (
+            f"portfolio-{validation.timing.signal_date:%Y%m%d}-"
+            f"{args.model}-"
+            f"{config['timing']['signal_horizon_trading_days']}d"
+        )
+
+        target_rows = []
+
+        for row in targets.target_weights.itertuples(index=False):
+            target_rows.append({
+                "portfolio_id": portfolio_id,
+                "signal_date": (
+                    validation.timing.signal_date.isoformat()
+                ),
+                "intended_execution_date": (
+                    validation.timing.intended_execution_date.isoformat()
+                ),
+                "ticker": row.ticker,
+                "issuer_group": row.issuer_group,
+                "target_weight": str(row.target_weight),
+                "rebalance_flag": "true",
+                "created_at": generated_at.isoformat(),
+            })
+
+        recorded = record_daily_paper_plan(
+            storage=storage,
+            broker=broker,
+            rows_by_ledger={
+                "signals.csv": signal_rows,
+                "target_weights.csv": target_rows,
+                "orders.csv": plan.order_rows(),
+                "skipped_trades.csv": plan.skipped_trade_rows(),
+            },
+        )
+
+        print()
+        if recorded:
+            print("PAPER PLAN RECORDED SUCCESSFULLY")
+        else:
+            print("PAPER PLAN ALREADY RECORDED; NO DUPLICATES ADDED")
+
+        print("No real orders were submitted.")
+    else:
+        print()
+        print("Preview only. No ledger rows or real orders were written.")
 
 
 if __name__ == "__main__":
