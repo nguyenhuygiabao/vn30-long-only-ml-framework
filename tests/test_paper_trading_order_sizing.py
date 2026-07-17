@@ -115,7 +115,7 @@ def test_issuer_group_cap_scales_related_tickers() -> None:
         order.ticker: order.requested_quantity
         for order in plan.executable_orders
     }
-    assert quantities == {"VHM": 1250, "VIC": 1250}
+    assert quantities == {"VHM": 1200, "VIC": 1200}
     assert sum(plan.constrained_target_weights.values()) == Decimal("0.25")
     assert sum(
         trade.requested_quantity

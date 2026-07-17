@@ -41,7 +41,7 @@ portfolio:
 
 execution:
   round_lot_size: 100
-  allow_odd_lots: true
+  allow_odd_lots: false
   min_trade_value_vnd: 500000
   adv_lookback_trading_days: 20
   max_trade_adv_fraction: 0.05
