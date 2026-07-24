@@ -1,6 +1,7 @@
 from pathlib import Path
 import pandas as pd
 from .data_loader import load_ohlcv_csv
+from .universe_history import filter_to_point_in_time_universe
 
 STOCK_SOURCE_PATH = "data/raw/vnstock/vn30_ohlcv.csv"
 OUTPUT_PATH = "data/processed/labels.parquet"
@@ -203,6 +204,25 @@ def add_leave_one_out_equal_weight_relative_labels(
         )
 
     return labels
+
+def build_point_in_time_relative_labels(
+    stock_data: pd.DataFrame,
+    membership: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Build returns on the full historical pool, then apply signal-date
+    membership before calculating the leave-one-out peer benchmark.
+    """
+    full_history_labels = build_forward_labels(stock_data)
+
+    eligible_labels = filter_to_point_in_time_universe(
+        market_data=full_history_labels,
+        membership=membership,
+    )
+
+    return add_leave_one_out_equal_weight_relative_labels(
+        eligible_labels
+    )
 
 def main() -> None: 
     """Build, save, and verify the forward-label dataset"""
